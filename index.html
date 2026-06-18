@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=0.4.2">
+    <link rel="stylesheet" href="./src/styles.css?v=0.5.1">
   </head>
   <body>
     <main class="app-shell">
@@ -34,12 +34,12 @@
                 Upload image
                 <input id="imageInput" type="file" accept="image/*">
               </label>
-              <button id="sampleBtn" class="ghost-button" type="button">Sample</button>
+              <button id="sampleBtn" class="ghost-button" type="button">Generate</button>
+              <button id="skipBtn" class="ghost-button" type="button">Skip</button>
             </div>
             <div class="panel-section">
               <div class="section-title">
                 <h2>Progress</h2>
-                <span id="completionPercent">0%</span>
               </div>
               <div id="moduleChecklist" class="module-checklist"></div>
             </div>
@@ -47,45 +47,51 @@
 
           <section class="coding-panel" aria-label="Expression coding workflow">
             <nav class="steps" aria-label="Workflow steps">
-              <button class="step is-active" type="button" data-step="0">Broad</button>
-              <button class="step" type="button" data-step="1">Signals</button>
-              <button class="step" type="button" data-step="2">Vocabulary</button>
-              <button class="step" type="button" data-step="3">Emotion</button>
-              <button class="step" type="button" data-step="4">Interpret</button>
-              <button class="step" type="button" data-step="5">Compare</button>
+              <button class="step is-active" type="button" data-step="0">Vocabulary</button>
+              <button class="step" type="button" data-step="1">Emotion</button>
+              <button class="step" type="button" data-step="2">Signals</button>
+              <button class="step" type="button" data-step="3">Interpret</button>
+              <button class="step" type="button" data-step="4">Compare</button>
             </nav>
 
             <form id="readingForm">
               <section class="screen is-active" data-screen="0">
                 <div class="screen-head">
-                  <h2>Broad Meaning</h2>
-                </div>
-                <div id="axisSliders" class="slider-stack compact-stack"></div>
-              </section>
-
-              <section class="screen" data-screen="1">
-                <div class="screen-head">
-                  <h2>Facial Signals</h2>
-                </div>
-                <div id="signalSliders" class="slider-stack compact-stack"></div>
-              </section>
-
-              <section class="screen" data-screen="2">
-                <div class="screen-head">
                   <h2>Vocabulary</h2>
                 </div>
                 <div id="taxonomyTabs" class="taxonomy-tabs"></div>
-                <div id="taxonomyGrid" class="taxonomy-grid"></div>
+                <div class="bin-workspace">
+                  <section class="term-bank" aria-label="Vocabulary terms">
+                    <div id="taxonomyGrid" class="taxonomy-grid"></div>
+                  </section>
+                  <section class="message-bins" aria-label="Expression message bins">
+                    <div class="message-bin" data-bin="external">
+                      <h3>External</h3>
+                      <div id="externalBin" class="bin-dropzone"></div>
+                    </div>
+                    <div class="message-bin" data-bin="internal">
+                      <h3>Internal</h3>
+                      <div id="internalBin" class="bin-dropzone"></div>
+                    </div>
+                  </section>
+                </div>
               </section>
 
-              <section class="screen" data-screen="3">
+              <section class="screen" data-screen="1">
                 <div class="screen-head">
                   <h2>Emotion Blend</h2>
                 </div>
                 <div id="emotionBlend" class="blend-grid"></div>
               </section>
 
-              <section class="screen" data-screen="4">
+              <section class="screen" data-screen="2">
+                <div class="screen-head">
+                  <h2>Facial Signals</h2>
+                </div>
+                <div id="signalSliders" class="signal-workspace"></div>
+              </section>
+
+              <section class="screen" data-screen="3">
                 <div class="screen-head">
                   <h2>Interpretation</h2>
                 </div>
@@ -105,7 +111,7 @@
                 </div>
               </section>
 
-              <section class="screen" data-screen="5">
+              <section class="screen" data-screen="4">
                 <div class="screen-head">
                   <h2>Compare</h2>
                 </div>
@@ -128,6 +134,6 @@
         </section>
       </section>
     </main>
-    <script src="./src/app.js?v=0.4.1" type="module"></script>
+    <script src="./src/app.js?v=0.5.2" type="module"></script>
   </body>
 </html>

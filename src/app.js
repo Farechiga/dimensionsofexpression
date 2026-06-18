@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=0.4.1";
+import { taxonomy } from "./taxonomy.js?v=0.5.0";
 
 const taxonomyOrder = [
   "core-affect",
@@ -15,37 +15,43 @@ const orderedTaxonomy = taxonomyOrder
   .filter(Boolean);
 
 const modules = [
-  { id: "image", label: "Reference image", isComplete: (reading) => Boolean(reading.imageName) },
-  { id: "axes", label: "Broad meaning", isComplete: (reading) => hasNonDefault(reading.axes, 50) },
-  { id: "signals", label: "Facial signal ratings", isComplete: (reading) => hasNonDefault(reading.signals, 35) },
-  { id: "taxonomy", label: "Nuanced vocabulary", isComplete: (reading) => reading.taxonomyTerms?.length > 0 },
-  { id: "blend", label: "Emotion blend", isComplete: (reading) => Object.keys(reading.blend || {}).length > 0 },
-  { id: "subtext", label: "Name and subtext", isComplete: (reading) => Boolean(reading.name && reading.name !== "Untitled reading" && reading.subtext) },
-  { id: "evidence", label: "Evidence note", isComplete: (reading) => Boolean(reading.evidence) }
+  { id: "image", label: "Image", isComplete: (draft) => Boolean(draft.imageName) },
+  { id: "vocabulary", label: "Vocabulary", isComplete: (draft) => draft.externalTerms?.length > 0 || draft.internalTerms?.length > 0 },
+  { id: "emotion", label: "Emotion", isComplete: (draft) => Object.keys(draft.blend || {}).length > 0 },
+  { id: "signals", label: "Signals", isComplete: (draft) => hasNonDefault(draft.signals, 0) || Object.keys(draft.signalDescriptors || {}).length > 0 },
+  { id: "interpret", label: "Interpret", isComplete: (draft) => Boolean(draft.name && draft.name !== "Untitled reading" && draft.subtext && draft.evidence) },
+  { id: "compare", label: "Compare", isComplete: (draft) => draft.savedReadings > 0 }
 ];
 
-const signals = [
-  "Smile warmth",
-  "Smile tension",
-  "Brow pain",
-  "Eye openness",
-  "Gaze connection",
-  "Facial asymmetry",
-  "Jaw control",
-  "Composure leakage"
-];
-
-const axes = [
-  ["Pleasant", "Painful"],
-  ["Low arousal", "High arousal"],
-  ["Powerless", "In control"],
-  ["Internal realization", "External recognition"],
-  ["Past wound", "Present repair"],
-  ["Private feeling", "Social performance"],
-  ["Open connection", "Defensive protection"],
-  ["Certainty", "Uncertainty"],
-  ["Goal closing", "Goal opening"],
-  ["Self-directed", "Other-directed"]
+const signalAttributes = [
+  {
+    name: "Brows",
+    terms: ["furrowed", "knitted", "pinched", "raised inner brows", "arched", "skeptical", "pleading", "alarmed", "brooding", "compressed", "tilted", "softened", "asymmetrical", "drawn together", "lifted in worry"]
+  },
+  {
+    name: "Eyes",
+    terms: ["wide", "glassy", "wet", "searching", "guarded", "soft", "hollow", "alert", "startled", "focused", "unfocused", "narrowed", "pleading", "watchful", "faraway"]
+  },
+  {
+    name: "Gaze",
+    terms: ["direct", "averted", "downcast", "sideward", "fixed", "flickering", "approaching", "withdrawing", "measuring", "exposed", "deflecting", "locked in", "looking through", "seeking safety", "performing contact"]
+  },
+  {
+    name: "Mouth",
+    terms: ["pressed", "parted", "tensed smile", "soft smile", "half smile", "held smile", "trembling", "flattened", "strained", "open in shock", "bitten lip", "downturned", "tight corners", "polite smile", "suppressed speech"]
+  },
+  {
+    name: "Jaw",
+    terms: ["clenched", "slack", "braced", "dropped", "set", "tight", "controlled", "quivering", "held back", "jutting", "swallowing emotion", "locked", "released", "stiffened", "restrained"]
+  },
+  {
+    name: "Cheeks and nose",
+    terms: ["lifted cheeks", "flushed", "tight cheeks", "slack cheeks", "wrinkled nose", "softened cheeks", "strained nasolabial fold", "tearful fullness", "smiling cheeks", "suppressed disgust", "compressed midface", "warmed", "drained", "tense nostrils", "micro-flinch"]
+  },
+  {
+    name: "Head and posture",
+    terms: ["chin lifted", "chin tucked", "head tilted", "head withdrawn", "leaning in", "leaning away", "braced shoulders", "open posture", "collapsed posture", "held still", "turning away", "offering", "protective", "formal", "unsteady"]
+  }
 ];
 
 const emotions = [
@@ -76,7 +82,11 @@ const state = {
   assets: [],
   currentImage: null,
   taxonomyIndex: 0,
-  selectedTerms: new Set()
+  termsByBin: {
+    external: new Set(),
+    internal: new Set()
+  },
+  generatedCount: 0
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -112,30 +122,27 @@ function getLatestReading(image = state.currentImage) {
   return getImageReadings(image)[0] || null;
 }
 
-function moduleStatus(reading = getLatestReading()) {
+function moduleStatus(draft = currentDraft()) {
   return modules.map((module) => ({
     ...module,
-    complete: reading ? module.isComplete(reading) : false
+    complete: module.isComplete(draft)
   }));
 }
 
 function renderAssetLibrary() {
   const builtIns = [
     {
-      id: "abstract-demo-face",
-      title: "Abstract demo face",
+      id: "generated-face",
+      title: "Generated expression",
       src: "",
       rightsMode: "generated-demo",
-      notes: "Built-in synthetic sample."
+      notes: "Generate or skip until a face is worth coding."
     }
   ];
   const allAssets = [...builtIns, ...state.assets];
   $("#assetCount").textContent = `${allAssets.length} frame${allAssets.length === 1 ? "" : "s"}`;
   $("#assetLibrary").innerHTML = allAssets.map((asset) => {
     const readings = getImageReadings({ id: asset.id, name: asset.title, title: asset.title });
-    const status = moduleStatus(readings[0]);
-    const complete = status.filter((module) => module.complete).length;
-    const percent = Math.round((complete / modules.length) * 100);
     const selected = state.currentImage?.id === asset.id;
     return `
       <button class="asset-card${selected ? " is-selected" : ""}" type="button" data-asset-id="${escapeHtml(asset.id)}">
@@ -143,9 +150,7 @@ function renderAssetLibrary() {
         <span class="asset-meta">
           <strong>${escapeHtml(assetTitle(asset))}</strong>
           <small>${escapeHtml(asset.rightsMode || "local-study")} · ${readings.length} reading${readings.length === 1 ? "" : "s"}</small>
-          <span class="progress-track"><span style="width:${percent}%"></span></span>
         </span>
-        <span class="asset-percent">${percent}%</span>
       </button>
     `;
   }).join("");
@@ -161,13 +166,8 @@ function renderAssetLibrary() {
 function renderModuleChecklist() {
   const status = moduleStatus();
   const complete = status.filter((module) => module.complete).length;
-  const percent = Math.round((complete / modules.length) * 100);
-  $("#completionPercent").textContent = `${percent}%`;
   $("#moduleChecklist").innerHTML = status.map((module) => `
-    <div class="module-item${module.complete ? " is-complete" : ""}">
-      <span>${module.complete ? "✓" : ""}</span>
-      <strong>${escapeHtml(module.label)}</strong>
-    </div>
+    <span class="progress-dot${module.complete ? " is-complete" : ""}" title="${escapeHtml(module.label)}"></span>
   `).join("");
 }
 
@@ -180,7 +180,7 @@ function setCurrentImage(image) {
 function sliderRow(name, options = {}) {
   const min = options.min ?? 0;
   const max = options.max ?? 100;
-  const value = options.value ?? 50;
+  const value = options.value ?? 0;
   const label = Array.isArray(name) ? `${name[0]} / ${name[1]}` : name;
   const id = slug(label);
   const left = Array.isArray(name) ? name[0] : "Low";
@@ -198,8 +198,22 @@ function sliderRow(name, options = {}) {
 }
 
 function buildSliders() {
-  $("#signalSliders").innerHTML = signals.map((signal) => sliderRow(signal, { value: 35 })).join("");
-  $("#axisSliders").innerHTML = axes.map((axis) => sliderRow(axis, { value: 50 })).join("");
+  $("#signalSliders").innerHTML = signalAttributes.map((attribute) => {
+    const id = slug(attribute.name);
+    return `
+      <article class="signal-card">
+        ${sliderRow(attribute.name, { value: 0 })}
+        <div class="descriptor-list">
+          ${attribute.terms.map((term) => `
+            <label class="descriptor-chip">
+              <input type="checkbox" name="signalDescriptor" value="${escapeHtml(`${attribute.name}: ${term}`)}">
+              <span>${escapeHtml(term)}</span>
+            </label>
+          `).join("")}
+        </div>
+      </article>
+    `;
+  }).join("");
   $("#emotionBlend").innerHTML = emotions.map((emotion) => {
     const id = `emotion-${slug(emotion)}`;
     return `
@@ -231,10 +245,11 @@ function buildTaxonomy() {
             <h3>${escapeHtml(group.label)}</h3>
             <div class="term-list">
               ${group.terms.map((term) => `
-                <label class="term-chip">
-                  <input type="checkbox" name="taxonomyTerm" value="${escapeHtml(`${category.title}: ${group.label}: ${term}`)}" ${state.selectedTerms.has(`${category.title}: ${group.label}: ${term}`) ? "checked" : ""}>
+                <span class="term-chip${termBin(`${category.title}: ${group.label}: ${term}`) ? " is-assigned" : ""}" draggable="true" data-term="${escapeHtml(`${category.title}: ${group.label}: ${term}`)}">
                   <span>${escapeHtml(term)}</span>
-                </label>
+                  <button type="button" data-assign="external">Ext</button>
+                  <button type="button" data-assign="internal">Int</button>
+                </span>
               `).join("")}
             </div>
           </div>
@@ -249,15 +264,7 @@ function buildTaxonomy() {
       buildTaxonomy();
     });
   });
-  $$("input[name='taxonomyTerm']").forEach((input) => {
-    input.addEventListener("change", () => {
-      if (input.checked) {
-        state.selectedTerms.add(input.value);
-      } else {
-        state.selectedTerms.delete(input.value);
-      }
-    });
-  });
+  renderBins();
 }
 
 function bindSliders() {
@@ -265,33 +272,32 @@ function bindSliders() {
     slider.addEventListener("input", () => {
       const output = document.querySelector(`[data-output="${slider.id}"]`);
       if (output) output.textContent = slider.value;
+      renderModuleChecklist();
     });
+  });
+  $$("input[name='signalDescriptor']").forEach((input) => {
+    input.addEventListener("change", renderModuleChecklist);
   });
 }
 
 function setStep(nextStep) {
-  state.step = Math.max(0, Math.min(5, nextStep));
+  state.step = Math.max(0, Math.min(4, nextStep));
   $$(".step").forEach((button) => button.classList.toggle("is-active", Number(button.dataset.step) === state.step));
   $$(".screen").forEach((screen) => screen.classList.toggle("is-active", Number(screen.dataset.screen) === state.step));
   $("#backBtn").disabled = state.step === 0;
-  $("#readingForm").classList.toggle("is-final", state.step === 5);
-  $("#readingForm").classList.toggle("is-saveable", state.step >= 4);
+  $("#readingForm").classList.toggle("is-final", state.step === 4);
+  $("#readingForm").classList.toggle("is-saveable", state.step >= 3);
   window.expressionDebug = { step: state.step, readings: state.readings.length };
   renderReadings();
   renderModuleChecklist();
 }
 
 function collectReading() {
-  const selectedTerms = $$("input[name='taxonomyTerm']:checked").map((input) => input.value);
-  selectedTerms.forEach((term) => state.selectedTerms.add(term));
-  const signalValues = Object.fromEntries(signals.map((signal) => {
-    const id = slug(signal);
-    return [signal, Number($(`#${id}`).value)];
+  const signalValues = Object.fromEntries(signalAttributes.map((attribute) => {
+    const id = slug(attribute.name);
+    return [attribute.name, Number($(`#${id}`).value)];
   }));
-  const axisValues = Object.fromEntries(axes.map((axis) => {
-    const id = slug(`${axis[0]} / ${axis[1]}`);
-    return [`${axis[0]} / ${axis[1]}`, Number($(`#${id}`).value)];
-  }));
+  const signalDescriptors = collectSignalDescriptors();
   const blend = Object.fromEntries(emotions.map((emotion) => {
     const id = `emotion-${slug(emotion)}`;
     return [emotion, Number($(`#${id}`).value)];
@@ -305,9 +311,11 @@ function collectReading() {
     name: $("#expressionName").value.trim() || "Untitled reading",
     subtext: $("#subtext").value.trim(),
     evidence: $("#evidence").value.trim(),
-    taxonomyTerms: Array.from(state.selectedTerms),
+    externalTerms: Array.from(state.termsByBin.external),
+    internalTerms: Array.from(state.termsByBin.internal),
+    taxonomyTerms: [...state.termsByBin.external, ...state.termsByBin.internal],
     signals: signalValues,
-    axes: axisValues,
+    signalDescriptors,
     blend
   };
 }
@@ -338,7 +346,7 @@ function renderReadings() {
       <article class="reading-card">
         <h3>${escapeHtml(reading.name)}</h3>
         <p>${escapeHtml(reading.subtext || "No subtext entered yet.")}</p>
-        <p class="reading-meta">${escapeHtml(reading.imageName || "Unknown frame")} · ${reading.taxonomyTerms?.length || 0} selected terms</p>
+        <p class="reading-meta">${escapeHtml(reading.imageName || "Unknown frame")} · ${reading.externalTerms?.length || 0} external · ${reading.internalTerms?.length || 0} internal</p>
         <div class="mini-bars">
           ${topBlend.map(([label, value]) => miniBar(label, value)).join("") || "<p>No emotion blend values set.</p>"}
         </div>
@@ -403,40 +411,53 @@ function loadImage(file) {
   reader.readAsDataURL(file);
 }
 
-function useSample() {
+function generatedFace(seed = Date.now()) {
+  const rand = seededRandom(seed);
+  const browTilt = Math.round((rand() - 0.5) * 90);
+  const browLift = Math.round((rand() - 0.5) * 60);
+  const mouthCurve = Math.round((rand() - 0.5) * 120);
+  const eyeOpen = 34 + Math.round(rand() * 24);
+  const gazeShift = Math.round((rand() - 0.5) * 28);
+  const cheek = 60 + Math.round(rand() * 50);
   const svg = encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
-      <rect width="800" height="800" fill="#efe9dd"/>
-      <circle cx="400" cy="360" r="230" fill="#d79b82"/>
-      <path d="M235 315 Q305 258 360 318" fill="none" stroke="#3f2b2b" stroke-width="24" stroke-linecap="round"/>
-      <path d="M445 320 Q510 255 575 330" fill="none" stroke="#3f2b2b" stroke-width="24" stroke-linecap="round"/>
-      <ellipse cx="315" cy="385" rx="58" ry="42" fill="#fff"/>
-      <ellipse cx="505" cy="385" rx="58" ry="42" fill="#fff"/>
-      <circle cx="330" cy="392" r="23" fill="#24434a"/>
-      <circle cx="490" cy="392" r="23" fill="#24434a"/>
-      <path d="M292 520 Q400 585 520 520" fill="none" stroke="#6b2d36" stroke-width="18" stroke-linecap="round"/>
-      <path d="M340 526 Q406 548 474 526" fill="none" stroke="#fff4ee" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
-      <path d="M255 465 Q295 480 330 462" stroke="#b86c63" stroke-width="10" stroke-linecap="round"/>
-      <path d="M475 462 Q520 482 560 463" stroke="#b86c63" stroke-width="10" stroke-linecap="round"/>
-      <text x="400" y="720" text-anchor="middle" font-family="Arial" font-size="28" fill="#6a635c">abstract demo face</text>
+      <rect width="800" height="800" fill="#ece8dd"/>
+      <circle cx="400" cy="360" r="226" fill="#d7a085"/>
+      <ellipse cx="305" cy="385" rx="62" ry="${eyeOpen}" fill="#fff"/>
+      <ellipse cx="505" cy="385" rx="62" ry="${Math.max(30, eyeOpen - 8)}" fill="#fff"/>
+      <circle cx="${305 + gazeShift}" cy="390" r="23" fill="#263d44"/>
+      <circle cx="${505 + gazeShift}" cy="390" r="23" fill="#263d44"/>
+      <path d="M235 ${312 + browLift} Q300 ${250 + browLift - browTilt} 365 ${314 + browLift}" fill="none" stroke="#3f2b2b" stroke-width="22" stroke-linecap="round"/>
+      <path d="M440 ${316 - browLift} Q505 ${250 - browLift + browTilt} 575 ${326 - browLift}" fill="none" stroke="#3f2b2b" stroke-width="22" stroke-linecap="round"/>
+      <path d="M292 526 Q400 ${570 - mouthCurve} 520 526" fill="none" stroke="#6b2d36" stroke-width="18" stroke-linecap="round"/>
+      <path d="M255 462 Q300 ${cheek} 338 462" stroke="#b86c63" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
+      <path d="M470 462 Q515 ${cheek} 560 462" stroke="#b86c63" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
+      <text x="400" y="720" text-anchor="middle" font-family="Arial" font-size="28" fill="#6a635c">generated expression ${state.generatedCount}</text>
     </svg>
   `);
-  $("#previewImage").src = `data:image/svg+xml;charset=utf-8,${svg}`;
-  $("#previewImage").alt = "Abstract demo face";
-  $("#previewImage").dataset.id = "abstract-demo-face";
-  $("#previewImage").dataset.name = "abstract-demo-face";
+  return `data:image/svg+xml;charset=utf-8,${svg}`;
+}
+
+function useSample() {
+  state.generatedCount += 1;
+  const id = `generated-expression-${state.generatedCount}`;
+  const src = generatedFace(Date.now() + state.generatedCount);
+  $("#previewImage").src = src;
+  $("#previewImage").alt = "Generated expression";
+  $("#previewImage").dataset.id = id;
+  $("#previewImage").dataset.name = id;
   $("#imageStage").classList.add("has-image");
   setCurrentImage({
-    id: "abstract-demo-face",
-    title: "Abstract demo face",
-    name: "abstract-demo-face",
-    src: "",
+    id,
+    title: `Generated expression ${state.generatedCount}`,
+    name: id,
+    src,
     rightsMode: "generated-demo"
   });
 }
 
 function selectAsset(asset) {
-  if (asset.id === "abstract-demo-face") {
+  if (asset.id === "generated-face") {
     useSample();
     return;
   }
@@ -454,28 +475,157 @@ function selectAsset(asset) {
   });
 }
 
-function exportJson() {
-  const blob = new Blob([JSON.stringify(state.readings, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `expression-readings-${new Date().toISOString().slice(0, 10)}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
 function resetAll() {
   window.localStorage?.removeItem("expressionReadings");
   state.readings = [];
-  state.selectedTerms.clear();
+  state.termsByBin.external.clear();
+  state.termsByBin.internal.clear();
   $("#readingForm").reset();
+  renderBins();
   renderAssetLibrary();
   setStep(0);
+}
+
+function emptyDraft() {
+  return {
+    imageName: "",
+    externalTerms: [],
+    internalTerms: [],
+    blend: {},
+    signals: {},
+    signalDescriptors: {},
+    name: "",
+    subtext: "",
+    evidence: "",
+    savedReadings: 0
+  };
+}
+
+function normalizeSavedReading(reading) {
+  return {
+    ...emptyDraft(),
+    ...reading,
+    externalTerms: reading.externalTerms || [],
+    internalTerms: reading.internalTerms || [],
+    savedReadings: 1
+  };
+}
+
+function currentDraft() {
+  return {
+    ...collectDraftFields(),
+    savedReadings: getImageReadings().length
+  };
+}
+
+function collectDraftFields() {
+  const blend = Object.fromEntries(emotions.map((emotion) => {
+    const input = $(`#emotion-${slug(emotion)}`);
+    return [emotion, Number(input?.value || 0)];
+  }).filter(([, value]) => value > 0));
+  const signals = Object.fromEntries(signalAttributes.map((attribute) => {
+    const input = $(`#${slug(attribute.name)}`);
+    return [attribute.name, Number(input?.value || 0)];
+  }));
+  return {
+    imageName: $("#previewImage")?.dataset.name || "",
+    externalTerms: Array.from(state.termsByBin.external),
+    internalTerms: Array.from(state.termsByBin.internal),
+    blend,
+    signals,
+    signalDescriptors: collectSignalDescriptors(),
+    name: $("#expressionName")?.value.trim() || "",
+    subtext: $("#subtext")?.value.trim() || "",
+    evidence: $("#evidence")?.value.trim() || ""
+  };
+}
+
+function collectSignalDescriptors() {
+  const descriptors = {};
+  $$("input[name='signalDescriptor']:checked").forEach((input) => {
+    const [attribute, term] = input.value.split(": ");
+    descriptors[attribute] ||= [];
+    descriptors[attribute].push(term);
+  });
+  return descriptors;
+}
+
+function termBin(term) {
+  if (state.termsByBin.external.has(term)) return "external";
+  if (state.termsByBin.internal.has(term)) return "internal";
+  return "";
+}
+
+function addTermToBin(term, bin) {
+  if (!term || !state.termsByBin[bin]) return;
+  state.termsByBin.external.delete(term);
+  state.termsByBin.internal.delete(term);
+  state.termsByBin[bin].add(term);
+  buildTaxonomy();
+  renderBins();
+  renderModuleChecklist();
+}
+
+function removeTerm(term) {
+  state.termsByBin.external.delete(term);
+  state.termsByBin.internal.delete(term);
+  buildTaxonomy();
+  renderBins();
+  renderModuleChecklist();
+}
+
+function renderBins() {
+  ["external", "internal"].forEach((bin) => {
+    const target = $(`#${bin}Bin`);
+    if (!target) return;
+    const terms = Array.from(state.termsByBin[bin]);
+    target.innerHTML = terms.map((term) => `
+      <button class="bin-chip" type="button" data-term="${escapeHtml(term)}">
+        ${escapeHtml(term.split(": ").pop())}
+      </button>
+    `).join("");
+    target.querySelectorAll(".bin-chip").forEach((chip) => {
+      chip.addEventListener("click", () => removeTerm(chip.dataset.term));
+    });
+  });
+}
+
+function bindBins() {
+  $("#taxonomyGrid").addEventListener("click", (event) => {
+    const chip = event.target.closest(".term-chip");
+    const assignment = event.target.closest("[data-assign]")?.dataset.assign || "external";
+    if (chip) addTermToBin(chip.dataset.term, assignment);
+  });
+  $("#taxonomyGrid").addEventListener("dragstart", (event) => {
+    const chip = event.target.closest(".term-chip");
+    if (chip) event.dataTransfer.setData("text/plain", chip.dataset.term);
+  });
+  $$(".message-bin").forEach((bin) => {
+    bin.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      bin.classList.add("is-over");
+    });
+    bin.addEventListener("dragleave", () => bin.classList.remove("is-over"));
+    bin.addEventListener("drop", (event) => {
+      event.preventDefault();
+      bin.classList.remove("is-over");
+      addTermToBin(event.dataTransfer.getData("text/plain"), bin.dataset.bin);
+    });
+  });
+}
+
+function seededRandom(seed) {
+  let value = seed % 2147483647;
+  return () => {
+    value = (value * 16807) % 2147483647;
+    return (value - 1) / 2147483646;
+  };
 }
 
 buildSliders();
 buildTaxonomy();
 bindSliders();
+bindBins();
 loadAssetManifest();
 renderModuleChecklist();
 
@@ -494,4 +644,8 @@ $("#imageStage").addEventListener("drop", (event) => {
   if (file && file.type.startsWith("image/")) loadImage(file);
 });
 $("#sampleBtn").addEventListener("click", useSample);
+$("#skipBtn").addEventListener("click", useSample);
+["expressionName", "subtext", "evidence"].forEach((id) => {
+  $(`#${id}`).addEventListener("input", renderModuleChecklist);
+});
 setStep(0);

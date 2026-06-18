@@ -144,7 +144,7 @@ h3 {
 
 .asset-card {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 44px;
+  grid-template-columns: 54px minmax(0, 1fr);
   gap: 10px;
   align-items: center;
   width: 100%;
@@ -197,27 +197,6 @@ h3 {
 .asset-meta small {
   color: var(--muted);
   font-size: 0.78rem;
-}
-
-.asset-percent {
-  color: var(--teal);
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-align: right;
-}
-
-.progress-track {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 99px;
-  background: #e6e2d8;
-}
-
-.progress-track span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--teal);
 }
 
 .image-stage {
@@ -284,43 +263,23 @@ h3 {
 }
 
 .module-checklist {
-  margin-top: 4px;
-}
-
-.module-item {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(6, 18px);
+  gap: 10px;
   align-items: center;
-  min-height: 34px;
-  padding: 7px 9px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fcfcfa;
-  color: var(--muted);
-  font-size: 0.84rem;
 }
 
-.module-item span {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--line);
+.progress-dot {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cfd5cf;
   border-radius: 50%;
-  background: #fff;
+  background: #f7f7f3;
 }
 
-.module-item.is-complete {
-  color: var(--ink);
-}
-
-.module-item.is-complete span {
+.progress-dot.is-complete {
   border-color: var(--teal);
   background: var(--teal);
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 900;
 }
 
 .coding-panel {
@@ -422,6 +381,67 @@ form {
   gap: 12px;
 }
 
+.bin-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+  gap: 12px;
+  min-height: 0;
+  flex: 1;
+}
+
+.term-bank,
+.message-bins {
+  min-height: 0;
+}
+
+.message-bins {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
+
+.message-bin {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fcfcfa;
+}
+
+.message-bin h3 {
+  margin: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--teal);
+}
+
+.message-bin.is-over {
+  border-color: var(--teal);
+  box-shadow: inset 0 0 0 1px var(--teal);
+}
+
+.bin-dropzone {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 7px;
+  min-height: 0;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.bin-chip {
+  min-height: 28px;
+  border: 1px solid #c6d8d4;
+  border-radius: 8px;
+  padding: 0 8px;
+  background: #eef5f2;
+  color: var(--teal);
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
 .taxonomy-card {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -477,7 +497,7 @@ form {
   align-items: center;
   gap: 6px;
   min-height: 32px;
-  padding: 0 10px;
+  padding: 0 5px 0 9px;
   border: 1px solid #d5d8d1;
   border-radius: 8px;
   background: #fff;
@@ -485,8 +505,24 @@ form {
   font-size: 0.84rem;
 }
 
-.term-chip input {
-  accent-color: var(--teal);
+.term-chip > span {
+  font-weight: 720;
+}
+
+.term-chip button {
+  min-height: 22px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f7f7f3;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 820;
+}
+
+.term-chip.is-assigned {
+  border-color: var(--teal);
+  background: #eef5f2;
+  color: var(--teal);
 }
 
 .slider-row {
@@ -494,6 +530,59 @@ form {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fcfcfa;
+}
+
+.signal-workspace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.signal-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fcfcfa;
+}
+
+.signal-card .slider-row {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+}
+
+.descriptor-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  min-height: 0;
+  padding: 9px;
+  overflow: hidden;
+}
+
+.descriptor-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 0 7px;
+  border: 1px solid #d5d8d1;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.descriptor-chip input {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--teal);
 }
 
 .slider-meta {
@@ -775,7 +864,7 @@ h1 {
 }
 
 .asset-card {
-  grid-template-columns: 44px minmax(0, 1fr) 38px;
+  grid-template-columns: 44px minmax(0, 1fr);
   padding: 6px;
 }
 
@@ -793,25 +882,13 @@ h1 {
   margin-top: 0;
 }
 
-.module-checklist {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.module-item {
-  min-height: 30px;
-  padding: 5px 7px;
-  font-size: 0.78rem;
-}
-
 .coding-panel {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
 }
 
 .steps {
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
 }
 
 .step {
@@ -1035,8 +1112,7 @@ form {
   .section-title h2,
   .section-title span,
   .asset-meta small,
-  .asset-percent,
-  .module-item strong {
+  .asset-meta strong {
     font-size: 0.66rem;
   }
 
@@ -1044,9 +1120,8 @@ form {
     grid-template-columns: 28px minmax(0, 1fr);
   }
 
-  .asset-percent,
   .asset-meta small,
-  .progress-track {
+  .asset-meta strong {
     display: none;
   }
 
@@ -1054,24 +1129,8 @@ form {
     width: 28px;
   }
 
-  .module-checklist {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-
-  .module-item {
-    grid-template-columns: 16px minmax(0, 1fr);
-    min-height: 22px;
-    padding: 3px 4px;
-  }
-
-  .module-item span {
-    width: 16px;
-    height: 16px;
-  }
-
   .steps {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     overflow: hidden;
   }
 
@@ -1092,6 +1151,23 @@ form {
     grid-template-columns: 1fr;
   }
 
+  .bin-workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .message-bins {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 6px;
+  }
+
+  .message-bin h3 {
+    padding: 6px 8px;
+    font-size: 0.72rem;
+  }
+
   .slider-row {
     padding: 7px;
   }
@@ -1103,5 +1179,11 @@ form {
 
   .term-chip {
     min-height: 24px;
+    padding-left: 6px;
+  }
+
+  .term-chip button {
+    min-height: 20px;
+    padding: 0 3px;
   }
 }
