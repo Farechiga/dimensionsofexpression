@@ -16,17 +16,17 @@ Then open <http://localhost:5173>.
 
 - Codex edits the local repository.
 - The app stores readings in the browser during early prototyping.
-- User-provided frames can be uploaded locally without being committed.
+- User-provided frames can be added through `assets/private/` without being committed.
 - Public demo assets should be generated, public-domain, or permissively licensed.
 - When ready, sync to `https://github.com/Farechiga/dimensionsofexpression`.
 
 ## Current Prototype
 
-- Asset drop workflow with `assets/manifest.json`
+- Asset workflow with `assets/manifest.json`
 - Per-image micro-module completion tracking
 - Contained workspace with one active decision space at a time
 - Progressive flow from vocabulary sorting to specific interpretation
-- Emotion blend sliders
+- Emotion wheel umbrella sliders
 - External/internal vocabulary bins for conflicting messages
 - Expandable taxonomy with multi-select nuanced terms
 - Acting/subtext prompt
@@ -49,6 +49,4 @@ The expressive vocabulary lives in `src/taxonomy.js` so categories and terms can
 2. Add entries to `assets/manifest.json`.
 3. Run the local site and select images from the Frame Library.
 
-Images inside `assets/private/` are ignored by Git. This keeps study frames local unless you deliberately move public-safe assets elsewhere.
-
-Browser upload previews an image in the viewer, but it does not write files into `assets/`. To persist uploaded images into the repository, use `assets/private/` and update `assets/manifest.json`, or add a small local import script/backend later.
+Images inside `assets/private/` are ignored by Git. This keeps study frames local unless you deliberately move public-safe assets elsewhere. The static browser app cannot write files back into `assets/`; repository images should be added through the folder and manifest.

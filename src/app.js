@@ -1,11 +1,13 @@
-import { taxonomy } from "./taxonomy.js?v=0.5.0";
+import { taxonomy } from "./taxonomy.js?v=0.6.0";
 
 const taxonomyOrder = [
+  "emotion-wheel",
   "core-affect",
   "appraisal",
   "social-display",
   "temporal-narrative",
   "emotion-blend",
+  "state-bearing",
   "acting-intention",
   "embodiment",
   "visible-anatomy"
@@ -55,15 +57,13 @@ const signalAttributes = [
 ];
 
 const emotions = [
-  "Joy",
-  "Sadness",
-  "Anger",
-  "Fear",
-  "Embarrassment",
-  "Hope",
-  "Relief",
-  "Empathic pain",
-  "Tenderness"
+  "Happy",
+  "Sad",
+  "Disgusted",
+  "Angry",
+  "Fearful",
+  "Uncomfortable",
+  "Surprised"
 ];
 
 function loadSavedReadings() {
@@ -86,7 +86,9 @@ const state = {
     external: new Set(),
     internal: new Set()
   },
-  generatedCount: 0
+  generatedCount: 0,
+  imageIndex: 0,
+  generatedImages: []
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -133,10 +135,10 @@ function renderAssetLibrary() {
   const builtIns = [
     {
       id: "generated-face",
-      title: "Generated expression",
+      title: "Expression set",
       src: "",
       rightsMode: "generated-demo",
-      notes: "Generate or skip until a face is worth coding."
+      notes: "Use arrows until a face is worth coding."
     }
   ];
   const allAssets = [...builtIns, ...state.assets];
@@ -175,6 +177,73 @@ function setCurrentImage(image) {
   state.currentImage = image;
   renderAssetLibrary();
   renderModuleChecklist();
+}
+
+function clearCurrentSelections() {
+  state.termsByBin.external.clear();
+  state.termsByBin.internal.clear();
+  $("#readingForm").reset();
+  renderBins();
+  buildTaxonomy();
+  bindSliders();
+  renderModuleChecklist();
+}
+
+function hasUnsavedSelections() {
+  const draft = collectDraftFields();
+  return Boolean(
+    draft.externalTerms.length ||
+    draft.internalTerms.length ||
+    Object.keys(draft.blend).length ||
+    hasNonDefault(draft.signals, 0) ||
+    Object.keys(draft.signalDescriptors).length ||
+    draft.name ||
+    draft.subtext ||
+    draft.evidence
+  );
+}
+
+function confirmImageChange() {
+  if (!hasUnsavedSelections()) return true;
+  return window.confirm("Are you sure? Your selections will be lost.");
+}
+
+function allBrowsableImages() {
+  return [...state.generatedImages, ...state.assets];
+}
+
+function ensureGeneratedImages(count = 8) {
+  while (state.generatedImages.length < count) {
+    state.generatedCount += 1;
+    const id = `generated-expression-${state.generatedCount}`;
+    state.generatedImages.push({
+      id,
+      title: `Generated expression ${state.generatedCount}`,
+      name: id,
+      src: generatedFace(9000 + state.generatedCount * 97, state.generatedCount),
+      rightsMode: "generated-demo"
+    });
+  }
+}
+
+function showImageAt(index) {
+  const images = allBrowsableImages();
+  if (!images.length) return;
+  state.imageIndex = (index + images.length) % images.length;
+  const image = images[state.imageIndex];
+  $("#previewImage").src = image.src;
+  $("#previewImage").alt = assetTitle(image);
+  $("#previewImage").dataset.id = image.id;
+  $("#previewImage").dataset.name = assetTitle(image);
+  $("#imageStage").classList.add("has-image");
+  setCurrentImage(image);
+}
+
+function changeImage(delta) {
+  if (!confirmImageChange()) return;
+  ensureGeneratedImages();
+  clearCurrentSelections();
+  showImageAt(state.imageIndex + delta);
 }
 
 function sliderRow(name, options = {}) {
@@ -411,7 +480,7 @@ function loadImage(file) {
   reader.readAsDataURL(file);
 }
 
-function generatedFace(seed = Date.now()) {
+function generatedFace(seed = Date.now(), label = state.generatedCount) {
   const rand = seededRandom(seed);
   const browTilt = Math.round((rand() - 0.5) * 90);
   const browLift = Math.round((rand() - 0.5) * 60);
@@ -432,35 +501,19 @@ function generatedFace(seed = Date.now()) {
       <path d="M292 526 Q400 ${570 - mouthCurve} 520 526" fill="none" stroke="#6b2d36" stroke-width="18" stroke-linecap="round"/>
       <path d="M255 462 Q300 ${cheek} 338 462" stroke="#b86c63" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
       <path d="M470 462 Q515 ${cheek} 560 462" stroke="#b86c63" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
-      <text x="400" y="720" text-anchor="middle" font-family="Arial" font-size="28" fill="#6a635c">generated expression ${state.generatedCount}</text>
+      <text x="400" y="720" text-anchor="middle" font-family="Arial" font-size="28" fill="#6a635c">generated expression ${label}</text>
     </svg>
   `);
   return `data:image/svg+xml;charset=utf-8,${svg}`;
 }
 
-function useSample() {
-  state.generatedCount += 1;
-  const id = `generated-expression-${state.generatedCount}`;
-  const src = generatedFace(Date.now() + state.generatedCount);
-  $("#previewImage").src = src;
-  $("#previewImage").alt = "Generated expression";
-  $("#previewImage").dataset.id = id;
-  $("#previewImage").dataset.name = id;
-  $("#imageStage").classList.add("has-image");
-  setCurrentImage({
-    id,
-    title: `Generated expression ${state.generatedCount}`,
-    name: id,
-    src,
-    rightsMode: "generated-demo"
-  });
-}
-
 function selectAsset(asset) {
   if (asset.id === "generated-face") {
-    useSample();
+    changeImage(1);
     return;
   }
+  if (!confirmImageChange()) return;
+  clearCurrentSelections();
   $("#previewImage").src = asset.src;
   $("#previewImage").alt = assetTitle(asset);
   $("#previewImage").dataset.id = asset.id;
@@ -627,24 +680,16 @@ buildTaxonomy();
 bindSliders();
 bindBins();
 loadAssetManifest();
+ensureGeneratedImages();
+showImageAt(0);
 renderModuleChecklist();
 
 $$(".step").forEach((button) => button.addEventListener("click", () => setStep(Number(button.dataset.step))));
 $("#backBtn").addEventListener("click", () => setStep(state.step - 1));
 $("#nextBtn").addEventListener("click", () => setStep(state.step + 1));
 $("#readingForm").addEventListener("submit", saveReading);
-$("#imageInput").addEventListener("change", (event) => {
-  const [file] = event.target.files;
-  if (file) loadImage(file);
-});
-$("#imageStage").addEventListener("dragover", (event) => event.preventDefault());
-$("#imageStage").addEventListener("drop", (event) => {
-  event.preventDefault();
-  const [file] = event.dataTransfer.files;
-  if (file && file.type.startsWith("image/")) loadImage(file);
-});
-$("#sampleBtn").addEventListener("click", useSample);
-$("#skipBtn").addEventListener("click", useSample);
+$("#prevImageBtn").addEventListener("click", () => changeImage(-1));
+$("#nextImageBtn").addEventListener("click", () => changeImage(1));
 ["expressionName", "subtext", "evidence"].forEach((id) => {
   $(`#${id}`).addEventListener("input", renderModuleChecklist);
 });

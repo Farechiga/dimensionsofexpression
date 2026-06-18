@@ -1,5 +1,41 @@
 export const taxonomy = [
   {
+    id: "emotion-wheel",
+    title: "Emotion Wheel",
+    source: "Emotion wheel vocabulary",
+    description: "Broad affect umbrellas with more specific feeling words from the wheel.",
+    groups: [
+      {
+        label: "Happy",
+        terms: ["playful", "aroused", "cheeky", "content", "free", "joyful", "interested", "curious", "inquisitive", "proud", "successful", "confident", "accepted", "respected", "valued", "powerful", "courageous", "creative", "peaceful", "loving", "thankful", "trusting", "sensitive", "intimate", "optimistic", "hopeful", "inspired"]
+      },
+      {
+        label: "Sad",
+        terms: ["lonely", "isolated", "abandoned", "vulnerable", "victimized", "fragile", "despair", "grief", "powerless", "guilty", "ashamed", "remorseful", "depressed", "empty", "inferior", "hurt", "disappointed", "embarrassed"]
+      },
+      {
+        label: "Disgusted",
+        terms: ["repelled", "hesitant", "horrified", "awful", "detestable", "nauseated", "disappointed", "revolted", "appalled", "disapproving", "judgmental", "embarrassed", "distant", "withdrawn", "numb", "critical", "skeptical", "dismissive"]
+      },
+      {
+        label: "Angry",
+        terms: ["let down", "betrayed", "resentful", "humiliated", "disrespected", "ridiculed", "bitter", "indignant", "violated", "mad", "furious", "jealous", "aggressive", "provoked", "hostile", "frustrated", "infuriated", "annoyed"]
+      },
+      {
+        label: "Fearful",
+        terms: ["scared", "helpless", "frightened", "anxious", "overwhelmed", "worried", "insecure", "inadequate", "inferior", "weak", "worthless", "insignificant", "rejected", "excluded", "persecuted", "threatened", "nervous", "exposed"]
+      },
+      {
+        label: "Uncomfortable",
+        terms: ["bored", "indifferent", "apathetic", "busy", "pressured", "rushed", "stressed", "overwhelmed", "out of control", "tired", "sleepy", "unfocused"]
+      },
+      {
+        label: "Surprised",
+        terms: ["startled", "shocked", "dismayed", "confused", "disillusioned", "perplexed", "amazed", "astonished", "awe", "excited", "eager", "energetic"]
+      }
+    ]
+  },
+  {
     id: "visible-anatomy",
     title: "Physical Evidence",
     source: "FACS / facial coding",
@@ -148,6 +184,30 @@ export const taxonomy = [
       {
         label: "Subtext",
         terms: ["please do not see this", "I need you to believe me", "I am happy and hurting", "I cannot say what I feel", "this changes everything", "I am trying to be kind"]
+      }
+    ]
+  },
+  {
+    id: "state-bearing",
+    title: "State and Bearing",
+    source: "Performance state vocabulary",
+    description: "Overall state, bearing, and presentation that can be external, internal, or mixed.",
+    groups: [
+      {
+        label: "Composure",
+        terms: ["poised", "composed", "collected", "steady", "self-possessed", "controlled", "formal", "gracious", "contained", "polished", "serene", "unruffled", "measured", "resolved", "dignified"]
+      },
+      {
+        label: "Agitation",
+        terms: ["harried", "frazzled", "rattled", "flustered", "frantic", "strained", "overextended", "restless", "jittery", "panicked", "pressured", "rushed", "scattered", "overloaded", "frayed"]
+      },
+      {
+        label: "Postural state",
+        terms: ["slumped", "upright", "braced", "collapsed", "lifted", "hunched", "guarded", "open", "withdrawn", "leaning in", "leaning away", "stiff", "loose", "rooted", "unsteady"]
+      },
+      {
+        label: "Energy state",
+        terms: ["buoyant", "drained", "depleted", "charged", "alert", "dulled", "sleepy", "wired", "heavy", "light", "frozen", "fluid", "activated", "subdued", "sparked"]
       }
     ]
   },

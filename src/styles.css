@@ -854,7 +854,7 @@ h1 {
 
 .image-panel {
   display: grid;
-  grid-template-rows: auto minmax(230px, 1fr) auto auto;
+  grid-template-rows: auto minmax(230px, 1fr) auto;
   gap: 10px;
   overflow: hidden;
 }
@@ -882,6 +882,36 @@ h1 {
   min-height: 0;
   height: 100%;
   aspect-ratio: auto;
+}
+
+.image-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 54px;
+  border: 1px solid rgba(32, 33, 36, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--teal);
+  font-size: 2rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+}
+
+.image-arrow-left {
+  left: 10px;
+}
+
+.image-arrow-right {
+  right: 10px;
+}
+
+.image-arrow:hover {
+  background: #fff;
+  border-color: var(--teal);
 }
 
 .image-controls {
@@ -1160,6 +1190,12 @@ form {
 
   .image-panel {
     padding: 8px;
+  }
+
+  .image-arrow {
+    width: 26px;
+    height: 40px;
+    font-size: 1.4rem;
   }
 
   .section-title h2,
