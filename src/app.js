@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=0.6.0";
+import { taxonomy } from "./taxonomy.js?v=0.7.0";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -82,6 +82,7 @@ const state = {
   assets: [],
   currentImage: null,
   taxonomyIndex: 0,
+  taxonomyGroupIndex: 0,
   termsByBin: {
     external: new Set(),
     internal: new Set()
@@ -94,6 +95,17 @@ const state = {
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const slug = (value) => String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const categoryLabels = {
+  "emotion-wheel": "Wheel",
+  "core-affect": "Affect",
+  "social-display": "Social",
+  "temporal-narrative": "Narrative",
+  "emotion-blend": "Blend",
+  "state-bearing": "State",
+  "acting-intention": "Acting",
+  "embodiment": "Effort",
+  "visible-anatomy": "Evidence"
+};
 
 function hasNonDefault(values = {}, defaultValue) {
   return Object.values(values).some((value) => Number(value) !== defaultValue);
@@ -132,6 +144,7 @@ function moduleStatus(draft = currentDraft()) {
 }
 
 function renderAssetLibrary() {
+  if (!$("#assetLibrary") || !$("#assetCount")) return;
   const builtIns = [
     {
       id: "generated-face",
@@ -296,33 +309,38 @@ function buildSliders() {
 
 function buildTaxonomy() {
   $("#taxonomyTabs").innerHTML = orderedTaxonomy.map((category, index) => `
-    <button class="taxonomy-tab${index === state.taxonomyIndex ? " is-active" : ""}" type="button" data-taxonomy-index="${index}">
-      ${escapeHtml(category.title)}
+    <button class="taxonomy-tab${index === state.taxonomyIndex ? " is-active" : ""}" type="button" data-taxonomy-index="${index}" title="${escapeHtml(category.title)}">
+      ${escapeHtml(categoryLabels[category.id] || category.title)}
     </button>
   `).join("");
 
   const category = orderedTaxonomy[state.taxonomyIndex] || orderedTaxonomy[0];
+  const activeGroup = category.groups[state.taxonomyGroupIndex] || category.groups[0];
   $("#taxonomyGrid").innerHTML = `
     <article class="taxonomy-card">
       <header>
         <strong>${escapeHtml(category.title)}</strong>
         <small>${escapeHtml(category.source)}</small>
       </header>
-      <div class="taxonomy-groups">
-        ${category.groups.map((group) => `
-          <div class="term-group">
-            <h3>${escapeHtml(group.label)}</h3>
-            <div class="term-list">
-              ${group.terms.map((term) => `
-                <span class="term-chip${termBin(`${category.title}: ${group.label}: ${term}`) ? " is-assigned" : ""}" draggable="true" data-term="${escapeHtml(`${category.title}: ${group.label}: ${term}`)}">
-                  <span>${escapeHtml(term)}</span>
-                  <button type="button" data-assign="external">Ext</button>
-                  <button type="button" data-assign="internal">Int</button>
-                </span>
-              `).join("")}
-            </div>
-          </div>
+      <div class="taxonomy-subtabs">
+        ${category.groups.map((group, index) => `
+          <button class="taxonomy-subtab${group === activeGroup ? " is-active" : ""}" type="button" data-taxonomy-group-index="${index}">
+            ${escapeHtml(group.label)}
+          </button>
         `).join("")}
+      </div>
+      <div class="taxonomy-groups">
+        <div class="term-group">
+          <div class="term-list">
+            ${activeGroup.terms.map((term) => `
+              <span class="term-chip${termBin(`${category.title}: ${activeGroup.label}: ${term}`) ? " is-assigned" : ""}" draggable="true" data-term="${escapeHtml(`${category.title}: ${activeGroup.label}: ${term}`)}">
+                <span>${escapeHtml(term)}</span>
+                <button type="button" data-assign="external">Ext</button>
+                <button type="button" data-assign="internal">Int</button>
+              </span>
+            `).join("")}
+          </div>
+        </div>
       </div>
     </article>
   `;
@@ -330,6 +348,13 @@ function buildTaxonomy() {
   $$(".taxonomy-tab").forEach((button) => {
     button.addEventListener("click", () => {
       state.taxonomyIndex = Number(button.dataset.taxonomyIndex);
+      state.taxonomyGroupIndex = 0;
+      buildTaxonomy();
+    });
+  });
+  $$(".taxonomy-subtab").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.taxonomyGroupIndex = Number(button.dataset.taxonomyGroupIndex);
       buildTaxonomy();
     });
   });
