@@ -4,37 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=0.3.0">
+    <link rel="stylesheet" href="./src/styles.css?v=0.4.2">
   </head>
   <body>
     <main class="app-shell">
       <section class="workspace">
         <header class="topbar">
-          <div>
-            <p class="eyebrow">Local-first expression lab</p>
-            <h1>Dimensions of Expression</h1>
-          </div>
-          <div class="session-actions">
-            <button id="mockupBtn" class="ghost-button" type="button">Mockup</button>
-            <button id="exportBtn" class="ghost-button" type="button">Export JSON</button>
-            <button id="resetBtn" class="ghost-button" type="button">Reset</button>
-          </div>
+          <h1>Dimensions of Expression</h1>
         </header>
-
-        <section class="mockup-panel" id="mockupPanel" aria-label="Site mockup">
-          <div class="mockup-copy">
-            <p class="eyebrow">Preliminary site shape</p>
-            <h2>Frame library, micro-module progress, and interpretive comparison in one workspace.</h2>
-          </div>
-          <div class="mockup-strip" aria-label="Workflow preview">
-            <span>1. Import frame</span>
-            <span>2. Observe cues</span>
-            <span>3. Rate signals</span>
-            <span>4. Map meaning</span>
-            <span>5. Name subtext</span>
-            <span>6. Compare readers</span>
-          </div>
-        </section>
 
         <section class="studio-grid">
           <aside class="image-panel" aria-label="Reference image workspace">
@@ -57,12 +34,11 @@
                 Upload image
                 <input id="imageInput" type="file" accept="image/*">
               </label>
-              <button id="sampleBtn" class="ghost-button" type="button">Use abstract sample</button>
+              <button id="sampleBtn" class="ghost-button" type="button">Sample</button>
             </div>
-            <p class="rights-note">Public repo mode: keep copyrighted frames out of commits. Local study mode: upload your own references in-browser.</p>
             <div class="panel-section">
               <div class="section-title">
-                <h2>Micro-Modules</h2>
+                <h2>Progress</h2>
                 <span id="completionPercent">0%</span>
               </div>
               <div id="moduleChecklist" class="module-checklist"></div>
@@ -71,69 +47,67 @@
 
           <section class="coding-panel" aria-label="Expression coding workflow">
             <nav class="steps" aria-label="Workflow steps">
-              <button class="step is-active" type="button" data-step="0">Observe</button>
-              <button class="step" type="button" data-step="1">Code</button>
-              <button class="step" type="button" data-step="2">Map</button>
-              <button class="step" type="button" data-step="3">Name</button>
-              <button class="step" type="button" data-step="4">Compare</button>
+              <button class="step is-active" type="button" data-step="0">Broad</button>
+              <button class="step" type="button" data-step="1">Signals</button>
+              <button class="step" type="button" data-step="2">Vocabulary</button>
+              <button class="step" type="button" data-step="3">Emotion</button>
+              <button class="step" type="button" data-step="4">Interpret</button>
+              <button class="step" type="button" data-step="5">Compare</button>
             </nav>
 
             <form id="readingForm">
               <section class="screen is-active" data-screen="0">
                 <div class="screen-head">
-                  <h2>Visible Cues</h2>
-                  <p>Start with what can be seen before deciding what it means.</p>
+                  <h2>Broad Meaning</h2>
                 </div>
-                <div class="cue-grid" id="cueGrid"></div>
+                <div id="axisSliders" class="slider-stack compact-stack"></div>
               </section>
 
               <section class="screen" data-screen="1">
                 <div class="screen-head">
                   <h2>Facial Signals</h2>
-                  <p>Rate visible intensities across anatomical cues.</p>
                 </div>
-                <div id="signalSliders" class="slider-stack"></div>
+                <div id="signalSliders" class="slider-stack compact-stack"></div>
               </section>
 
               <section class="screen" data-screen="2">
                 <div class="screen-head">
-                  <h2>Meaning Maps</h2>
-                  <p>Place the expression across affect, appraisal, and social-display dimensions.</p>
+                  <h2>Vocabulary</h2>
                 </div>
-                <div id="axisSliders" class="slider-stack"></div>
-                <div class="taxonomy-block">
-                  <div class="screen-head">
-                    <h2>Nuanced Vocabulary</h2>
-                    <p>Select any terms that help name the expression without forcing a single emotion.</p>
-                  </div>
-                  <div id="taxonomyGrid" class="taxonomy-grid"></div>
-                </div>
+                <div id="taxonomyTabs" class="taxonomy-tabs"></div>
+                <div id="taxonomyGrid" class="taxonomy-grid"></div>
               </section>
 
               <section class="screen" data-screen="3">
                 <div class="screen-head">
-                  <h2>Blend and Subtext</h2>
-                  <p>Give the expression a compact reading, then explain the evidence.</p>
+                  <h2>Emotion Blend</h2>
                 </div>
                 <div id="emotionBlend" class="blend-grid"></div>
-                <label class="field">
-                  <span>Expression name</span>
-                  <input id="expressionName" type="text" placeholder="pained hopeful recognition">
-                </label>
-                <label class="field">
-                  <span>Subtext</span>
-                  <textarea id="subtext" rows="4" placeholder="I want to encourage you, but I am absorbing what this costs."></textarea>
-                </label>
-                <label class="field">
-                  <span>Evidence</span>
-                  <textarea id="evidence" rows="4" placeholder="Inner brows lift while the mouth smiles softly; the gaze is open but heavy."></textarea>
-                </label>
               </section>
 
               <section class="screen" data-screen="4">
                 <div class="screen-head">
-                  <h2>Reading Cloud</h2>
-                  <p>Compare saved interpretations from this browser session.</p>
+                  <h2>Interpretation</h2>
+                </div>
+                <div class="interpretation-fields">
+                  <label class="field">
+                    <span>Expression name</span>
+                    <input id="expressionName" type="text" placeholder="pained hopeful recognition">
+                  </label>
+                  <label class="field">
+                    <span>Subtext</span>
+                    <textarea id="subtext" rows="4" placeholder="I want to encourage you, but I am absorbing what this costs."></textarea>
+                  </label>
+                  <label class="field">
+                    <span>Evidence</span>
+                    <textarea id="evidence" rows="4" placeholder="Inner brows lift while the mouth smiles softly; the gaze is open but heavy."></textarea>
+                  </label>
+                </div>
+              </section>
+
+              <section class="screen" data-screen="5">
+                <div class="screen-head">
+                  <h2>Compare</h2>
                 </div>
                 <div class="compare-layout">
                   <div id="readingList" class="reading-list"></div>
@@ -154,6 +128,6 @@
         </section>
       </section>
     </main>
-    <script src="./src/app.js?v=0.3.0" type="module"></script>
+    <script src="./src/app.js?v=0.4.1" type="module"></script>
   </body>
 </html>

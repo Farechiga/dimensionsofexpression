@@ -1,25 +1,27 @@
-import { taxonomy } from "./taxonomy.js";
+import { taxonomy } from "./taxonomy.js?v=0.4.1";
+
+const taxonomyOrder = [
+  "core-affect",
+  "appraisal",
+  "social-display",
+  "temporal-narrative",
+  "emotion-blend",
+  "acting-intention",
+  "embodiment",
+  "visible-anatomy"
+];
+const orderedTaxonomy = taxonomyOrder
+  .map((id) => taxonomy.find((category) => category.id === id))
+  .filter(Boolean);
 
 const modules = [
   { id: "image", label: "Reference image", isComplete: (reading) => Boolean(reading.imageName) },
-  { id: "cues", label: "Visible cue pass", isComplete: (reading) => reading.cues?.length > 0 },
+  { id: "axes", label: "Broad meaning", isComplete: (reading) => hasNonDefault(reading.axes, 50) },
   { id: "signals", label: "Facial signal ratings", isComplete: (reading) => hasNonDefault(reading.signals, 35) },
-  { id: "axes", label: "Meaning-map axes", isComplete: (reading) => hasNonDefault(reading.axes, 50) },
   { id: "taxonomy", label: "Nuanced vocabulary", isComplete: (reading) => reading.taxonomyTerms?.length > 0 },
   { id: "blend", label: "Emotion blend", isComplete: (reading) => Object.keys(reading.blend || {}).length > 0 },
   { id: "subtext", label: "Name and subtext", isComplete: (reading) => Boolean(reading.name && reading.name !== "Untitled reading" && reading.subtext) },
   { id: "evidence", label: "Evidence note", isComplete: (reading) => Boolean(reading.evidence) }
-];
-
-const cues = [
-  ["Brows", "Inner lift, compression, asymmetry, or grief tension."],
-  ["Eyes", "Widening, softness, wetness, squint, gaze target, avoidance."],
-  ["Mouth", "Smile shape, corners, teeth, lip press, tremor, restraint."],
-  ["Cheeks", "Raised warmth, social smile pressure, blush, slackness."],
-  ["Jaw", "Clench, drop, held composure, or suppressed speech."],
-  ["Head", "Tilt, retreat, offering, bracing, or sudden beat change."],
-  ["Body", "Open/closed posture, approach/avoidance, protective tension."],
-  ["Animation", "Exaggeration, staging, appeal, and readable silhouette."]
 ];
 
 const signals = [
@@ -72,7 +74,9 @@ const state = {
   step: 0,
   readings: loadSavedReadings(),
   assets: [],
-  currentImage: null
+  currentImage: null,
+  taxonomyIndex: 0,
+  selectedTerms: new Set()
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -173,15 +177,6 @@ function setCurrentImage(image) {
   renderModuleChecklist();
 }
 
-function buildCues() {
-  $("#cueGrid").innerHTML = cues.map(([name, detail]) => `
-    <label class="cue-card">
-      <input type="checkbox" name="cue" value="${name}">
-      <span><strong>${name}</strong><span>${detail}</span></span>
-    </label>
-  `).join("");
-}
-
 function sliderRow(name, options = {}) {
   const min = options.min ?? 0;
   const max = options.max ?? 100;
@@ -217,30 +212,52 @@ function buildSliders() {
 }
 
 function buildTaxonomy() {
-  $("#taxonomyGrid").innerHTML = taxonomy.map((category) => `
-    <details class="taxonomy-card" open>
-      <summary>
-        <span>
-          <strong>${escapeHtml(category.title)}</strong>
-          <small>${escapeHtml(category.source)}</small>
-        </span>
-      </summary>
-      <p>${escapeHtml(category.description)}</p>
-      ${category.groups.map((group) => `
-        <div class="term-group">
-          <h3>${escapeHtml(group.label)}</h3>
-          <div class="term-list">
-            ${group.terms.map((term) => `
-              <label class="term-chip">
-                <input type="checkbox" name="taxonomyTerm" value="${escapeHtml(`${category.title}: ${group.label}: ${term}`)}">
-                <span>${escapeHtml(term)}</span>
-              </label>
-            `).join("")}
-          </div>
-        </div>
-      `).join("")}
-    </details>
+  $("#taxonomyTabs").innerHTML = orderedTaxonomy.map((category, index) => `
+    <button class="taxonomy-tab${index === state.taxonomyIndex ? " is-active" : ""}" type="button" data-taxonomy-index="${index}">
+      ${escapeHtml(category.title)}
+    </button>
   `).join("");
+
+  const category = orderedTaxonomy[state.taxonomyIndex] || orderedTaxonomy[0];
+  $("#taxonomyGrid").innerHTML = `
+    <article class="taxonomy-card">
+      <header>
+        <strong>${escapeHtml(category.title)}</strong>
+        <small>${escapeHtml(category.source)}</small>
+      </header>
+      <div class="taxonomy-groups">
+        ${category.groups.map((group) => `
+          <div class="term-group">
+            <h3>${escapeHtml(group.label)}</h3>
+            <div class="term-list">
+              ${group.terms.map((term) => `
+                <label class="term-chip">
+                  <input type="checkbox" name="taxonomyTerm" value="${escapeHtml(`${category.title}: ${group.label}: ${term}`)}" ${state.selectedTerms.has(`${category.title}: ${group.label}: ${term}`) ? "checked" : ""}>
+                  <span>${escapeHtml(term)}</span>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </article>
+  `;
+
+  $$(".taxonomy-tab").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.taxonomyIndex = Number(button.dataset.taxonomyIndex);
+      buildTaxonomy();
+    });
+  });
+  $$("input[name='taxonomyTerm']").forEach((input) => {
+    input.addEventListener("change", () => {
+      if (input.checked) {
+        state.selectedTerms.add(input.value);
+      } else {
+        state.selectedTerms.delete(input.value);
+      }
+    });
+  });
 }
 
 function bindSliders() {
@@ -253,20 +270,20 @@ function bindSliders() {
 }
 
 function setStep(nextStep) {
-  state.step = Math.max(0, Math.min(4, nextStep));
+  state.step = Math.max(0, Math.min(5, nextStep));
   $$(".step").forEach((button) => button.classList.toggle("is-active", Number(button.dataset.step) === state.step));
   $$(".screen").forEach((screen) => screen.classList.toggle("is-active", Number(screen.dataset.screen) === state.step));
   $("#backBtn").disabled = state.step === 0;
-  $("#readingForm").classList.toggle("is-final", state.step === 4);
-  $("#readingForm").classList.toggle("is-saveable", state.step >= 3);
+  $("#readingForm").classList.toggle("is-final", state.step === 5);
+  $("#readingForm").classList.toggle("is-saveable", state.step >= 4);
   window.expressionDebug = { step: state.step, readings: state.readings.length };
   renderReadings();
   renderModuleChecklist();
 }
 
 function collectReading() {
-  const checkedCues = $$("input[name='cue']:checked").map((input) => input.value);
   const selectedTerms = $$("input[name='taxonomyTerm']:checked").map((input) => input.value);
+  selectedTerms.forEach((term) => state.selectedTerms.add(term));
   const signalValues = Object.fromEntries(signals.map((signal) => {
     const id = slug(signal);
     return [signal, Number($(`#${id}`).value)];
@@ -288,8 +305,7 @@ function collectReading() {
     name: $("#expressionName").value.trim() || "Untitled reading",
     subtext: $("#subtext").value.trim(),
     evidence: $("#evidence").value.trim(),
-    cues: checkedCues,
-    taxonomyTerms: selectedTerms,
+    taxonomyTerms: Array.from(state.selectedTerms),
     signals: signalValues,
     axes: axisValues,
     blend
@@ -451,12 +467,12 @@ function exportJson() {
 function resetAll() {
   window.localStorage?.removeItem("expressionReadings");
   state.readings = [];
+  state.selectedTerms.clear();
   $("#readingForm").reset();
   renderAssetLibrary();
   setStep(0);
 }
 
-buildCues();
 buildSliders();
 buildTaxonomy();
 bindSliders();
@@ -478,7 +494,4 @@ $("#imageStage").addEventListener("drop", (event) => {
   if (file && file.type.startsWith("image/")) loadImage(file);
 });
 $("#sampleBtn").addEventListener("click", useSample);
-$("#exportBtn").addEventListener("click", exportJson);
-$("#resetBtn").addEventListener("click", resetAll);
-$("#mockupBtn").addEventListener("click", () => $("#mockupPanel").classList.toggle("is-collapsed"));
 setStep(0);

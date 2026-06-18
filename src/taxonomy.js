@@ -1,9 +1,9 @@
 export const taxonomy = [
   {
     id: "visible-anatomy",
-    title: "Visible Anatomy",
+    title: "Physical Evidence",
     source: "FACS / facial coding",
-    description: "Observable facial and bodily cues before interpretation.",
+    description: "Observable facial and bodily signals before interpretation.",
     groups: [
       {
         label: "Brows and forehead",
@@ -170,22 +170,6 @@ export const taxonomy = [
         terms: ["held breath", "released breath", "tightened", "expanded", "collapsed", "lifted", "rooted", "unsteady", "buoyant"]
       }
     ]
-  },
-  {
-    id: "animation-readability",
-    title: "Animation Readability",
-    source: "Disney animation principles / performance animation",
-    description: "How the frame stages and clarifies emotion for a viewer.",
-    groups: [
-      {
-        label: "Readability tools",
-        terms: ["staging", "exaggeration", "appeal", "silhouette clarity", "contrast", "asymmetry", "held pose", "anticipation", "secondary action"]
-      },
-      {
-        label: "Design emphasis",
-        terms: ["eyes carry meaning", "mouth contradicts eyes", "brow leads emotion", "pose supports face", "lighting softens", "composition isolates", "gesture reveals"]
-      }
-    ]
   }
 ];
 
@@ -194,6 +178,5 @@ export const literatureNotes = [
   "Russell and PAD models support continuous valence, arousal, and dominance/control ratings.",
   "Appraisal theories describe emotion as evaluation of novelty, goal relevance, agency, coping, and norm fit.",
   "Display-rule research helps name masking, intensifying, suppressing, and socially managed expressions.",
-  "Laban and acting vocabularies help translate static expressions into playable intention, obstacle, and embodied effort.",
-  "Animation principles help explain why a freeze frame is readable: staging, exaggeration, contrast, and appeal."
+  "Laban and acting vocabularies help translate static expressions into playable intention, obstacle, and embodied effort."
 ];

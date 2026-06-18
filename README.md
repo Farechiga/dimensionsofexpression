@@ -24,15 +24,13 @@ Then open <http://localhost:5173>.
 
 - Asset drop workflow with `assets/manifest.json`
 - Per-image micro-module completion tracking
-- Preliminary studio mockup panel
-- Progressive labeling workflow
-- Region cue checklist
+- Contained workspace with one active decision space at a time
+- Progressive flow from broad meaning to specific interpretation
 - Emotion blend sliders
 - Appraisal and social-display axes
 - Expandable taxonomy with multi-select nuanced terms
 - Acting/subtext prompt
 - Local comparison of multiple readings
-- JSON export
 
 ## Taxonomy Backbone
 
@@ -44,7 +42,6 @@ The expressive vocabulary lives in `src/taxonomy.js` so categories and terms can
 - Display rules: masking, leakage, social performance, impression management
 - Acting vocabulary: objective, obstacle, intention, subtext
 - Laban movement analysis: direct/indirect, strong/light, sudden/sustained, bound/free
-- Animation principles: staging, exaggeration, readable contrast, appeal
 
 ## Adding Local Images
 
