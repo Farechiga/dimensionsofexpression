@@ -1075,6 +1075,53 @@ form {
   padding-top: 12px;
 }
 
+.signal-workspace {
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.signal-card {
+  grid-template-rows: 58px minmax(58px, 1fr);
+}
+
+.signal-card .slider-row {
+  display: grid;
+  grid-template-rows: auto 18px;
+  gap: 4px;
+  padding: 8px 10px 6px;
+}
+
+.signal-card .slider-meta {
+  margin-bottom: 0;
+}
+
+.signal-card .slider-meta strong {
+  font-size: 0.92rem;
+}
+
+.signal-card .slider-meta span {
+  font-size: 0.78rem;
+}
+
+.signal-card input[type="range"] {
+  height: 18px;
+}
+
+.signal-card .axis-labels {
+  display: none;
+}
+
+.descriptor-list {
+  height: 68px;
+  max-height: 68px;
+  padding: 7px 8px;
+}
+
+.descriptor-chip {
+  min-height: 24px;
+  padding: 0 7px;
+}
+
 @media (max-width: 940px) {
   html,
   body {
@@ -1184,6 +1231,36 @@ form {
 
   .slider-row {
     padding: 7px;
+  }
+
+  .signal-workspace {
+    gap: 6px;
+  }
+
+  .signal-card {
+    grid-template-rows: 46px minmax(48px, 1fr);
+  }
+
+  .signal-card .slider-row {
+    grid-template-rows: auto 14px;
+    padding: 5px 7px 4px;
+  }
+
+  .signal-card .slider-meta strong {
+    font-size: 0.72rem;
+  }
+
+  .descriptor-list {
+    height: 54px;
+    max-height: 54px;
+    gap: 4px;
+    padding: 5px 6px;
+  }
+
+  .descriptor-chip {
+    min-height: 20px;
+    padding: 0 5px;
+    font-size: 0.62rem;
   }
 
   .taxonomy-tab,
