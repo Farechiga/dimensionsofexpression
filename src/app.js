@@ -1,3 +1,5 @@
+import { taxonomy } from "./taxonomy.js";
+
 const cues = [
   ["Brows", "Inner lift, compression, asymmetry, or grief tension."],
   ["Eyes", "Widening, softness, wetness, squint, gaze target, avoidance."],
@@ -107,6 +109,33 @@ function buildSliders() {
   }).join("");
 }
 
+function buildTaxonomy() {
+  $("#taxonomyGrid").innerHTML = taxonomy.map((category) => `
+    <details class="taxonomy-card" open>
+      <summary>
+        <span>
+          <strong>${escapeHtml(category.title)}</strong>
+          <small>${escapeHtml(category.source)}</small>
+        </span>
+      </summary>
+      <p>${escapeHtml(category.description)}</p>
+      ${category.groups.map((group) => `
+        <div class="term-group">
+          <h3>${escapeHtml(group.label)}</h3>
+          <div class="term-list">
+            ${group.terms.map((term) => `
+              <label class="term-chip">
+                <input type="checkbox" name="taxonomyTerm" value="${escapeHtml(`${category.title}: ${group.label}: ${term}`)}">
+                <span>${escapeHtml(term)}</span>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      `).join("")}
+    </details>
+  `).join("");
+}
+
 function bindSliders() {
   $$("[data-slider]").forEach((slider) => {
     slider.addEventListener("input", () => {
@@ -129,6 +158,7 @@ function setStep(nextStep) {
 
 function collectReading() {
   const checkedCues = $$("input[name='cue']:checked").map((input) => input.value);
+  const selectedTerms = $$("input[name='taxonomyTerm']:checked").map((input) => input.value);
   const signalValues = Object.fromEntries(signals.map((signal) => {
     const id = slug(signal);
     return [signal, Number($(`#${id}`).value)];
@@ -150,6 +180,7 @@ function collectReading() {
     subtext: $("#subtext").value.trim(),
     evidence: $("#evidence").value.trim(),
     cues: checkedCues,
+    taxonomyTerms: selectedTerms,
     signals: signalValues,
     axes: axisValues,
     blend
@@ -280,6 +311,7 @@ function resetAll() {
 
 buildCues();
 buildSliders();
+buildTaxonomy();
 bindSliders();
 
 $$(".step").forEach((button) => button.addEventListener("click", () => setStep(Number(button.dataset.step))));

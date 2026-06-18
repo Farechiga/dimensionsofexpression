@@ -26,6 +26,19 @@ Then open <http://localhost:5173>.
 - Region cue checklist
 - Emotion blend sliders
 - Appraisal and social-display axes
+- Expandable taxonomy with multi-select nuanced terms
 - Acting/subtext prompt
 - Local comparison of multiple readings
 - JSON export
+
+## Taxonomy Backbone
+
+The expressive vocabulary lives in `src/taxonomy.js` so categories and terms can expand without rewriting the interface. The first taxonomy pass draws from:
+
+- FACS and facial coding: visible movement before interpretation
+- Russell/PAD affect models: valence, arousal, dominance/control
+- Appraisal theory: novelty, goal relevance, agency, coping, certainty
+- Display rules: masking, leakage, social performance, impression management
+- Acting vocabulary: objective, obstacle, intention, subtext
+- Laban movement analysis: direct/indirect, strong/light, sudden/sustained, bound/free
+- Animation principles: staging, exaggeration, readable contrast, appeal
