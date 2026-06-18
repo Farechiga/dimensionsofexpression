@@ -383,7 +383,8 @@ form {
 
 .bin-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(0, 1fr) 132px;
   gap: 12px;
   min-height: 0;
   flex: 1;
@@ -394,9 +395,14 @@ form {
   min-height: 0;
 }
 
+.term-bank {
+  display: grid;
+  min-height: 0;
+}
+
 .message-bins {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -1145,21 +1151,29 @@ form {
   }
 
   .compact-stack,
-  .taxonomy-tabs,
   .taxonomy-groups,
   .blend-grid {
     grid-template-columns: 1fr;
   }
 
+  .taxonomy-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .taxonomy-tab {
+    min-height: 24px;
+    font-size: 0.56rem;
+  }
+
   .bin-workspace {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 76px;
     gap: 6px;
   }
 
   .message-bins {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
     gap: 6px;
   }
 
