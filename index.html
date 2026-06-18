@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dimensions of Expression</title>
+    <link rel="stylesheet" href="./src/styles.css?v=0.1.3">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Local-first expression lab</p>
+            <h1>Dimensions of Expression</h1>
+          </div>
+          <div class="session-actions">
+            <button id="exportBtn" class="ghost-button" type="button">Export JSON</button>
+            <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+          </div>
+        </header>
+
+        <section class="studio-grid">
+          <aside class="image-panel" aria-label="Reference image workspace">
+            <div class="image-stage" id="imageStage">
+              <div class="placeholder">
+                <span class="placeholder-mark">+</span>
+                <p>Drop or upload a reference frame</p>
+              </div>
+              <img id="previewImage" alt="">
+            </div>
+            <div class="image-controls">
+              <label class="file-button">
+                Upload image
+                <input id="imageInput" type="file" accept="image/*">
+              </label>
+              <button id="sampleBtn" class="ghost-button" type="button">Use abstract sample</button>
+            </div>
+            <p class="rights-note">Public repo mode: keep copyrighted frames out of commits. Local study mode: upload your own references in-browser.</p>
+          </aside>
+
+          <section class="coding-panel" aria-label="Expression coding workflow">
+            <nav class="steps" aria-label="Workflow steps">
+              <button class="step is-active" type="button" data-step="0">Observe</button>
+              <button class="step" type="button" data-step="1">Code</button>
+              <button class="step" type="button" data-step="2">Map</button>
+              <button class="step" type="button" data-step="3">Name</button>
+              <button class="step" type="button" data-step="4">Compare</button>
+            </nav>
+
+            <form id="readingForm">
+              <section class="screen is-active" data-screen="0">
+                <div class="screen-head">
+                  <h2>Visible Cues</h2>
+                  <p>Start with what can be seen before deciding what it means.</p>
+                </div>
+                <div class="cue-grid" id="cueGrid"></div>
+              </section>
+
+              <section class="screen" data-screen="1">
+                <div class="screen-head">
+                  <h2>Facial Signals</h2>
+                  <p>Rate visible intensities across anatomical cues.</p>
+                </div>
+                <div id="signalSliders" class="slider-stack"></div>
+              </section>
+
+              <section class="screen" data-screen="2">
+                <div class="screen-head">
+                  <h2>Meaning Maps</h2>
+                  <p>Place the expression across affect, appraisal, and social-display dimensions.</p>
+                </div>
+                <div id="axisSliders" class="slider-stack"></div>
+              </section>
+
+              <section class="screen" data-screen="3">
+                <div class="screen-head">
+                  <h2>Blend and Subtext</h2>
+                  <p>Give the expression a compact reading, then explain the evidence.</p>
+                </div>
+                <div id="emotionBlend" class="blend-grid"></div>
+                <label class="field">
+                  <span>Expression name</span>
+                  <input id="expressionName" type="text" placeholder="pained hopeful recognition">
+                </label>
+                <label class="field">
+                  <span>Subtext</span>
+                  <textarea id="subtext" rows="4" placeholder="I want to encourage you, but I am absorbing what this costs."></textarea>
+                </label>
+                <label class="field">
+                  <span>Evidence</span>
+                  <textarea id="evidence" rows="4" placeholder="Inner brows lift while the mouth smiles softly; the gaze is open but heavy."></textarea>
+                </label>
+              </section>
+
+              <section class="screen" data-screen="4">
+                <div class="screen-head">
+                  <h2>Reading Cloud</h2>
+                  <p>Compare saved interpretations from this browser session.</p>
+                </div>
+                <div class="compare-layout">
+                  <div id="readingList" class="reading-list"></div>
+                  <div class="summary-panel">
+                    <h3>Consensus Shape</h3>
+                    <div id="consensus" class="consensus"></div>
+                  </div>
+                </div>
+              </section>
+
+              <div class="form-actions">
+                <button id="backBtn" class="ghost-button" type="button">Back</button>
+                <button id="nextBtn" class="primary-button" type="button">Next</button>
+                <button id="saveBtn" class="primary-button" type="submit">Save reading</button>
+              </div>
+            </form>
+          </section>
+        </section>
+      </section>
+    </main>
+    <script src="./src/app.js?v=0.1.3" type="module"></script>
+  </body>
+</html>
