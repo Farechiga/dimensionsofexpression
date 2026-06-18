@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=0.2.0">
+    <link rel="stylesheet" href="./src/styles.css?v=0.3.0">
   </head>
   <body>
     <main class="app-shell">
@@ -15,13 +15,36 @@
             <h1>Dimensions of Expression</h1>
           </div>
           <div class="session-actions">
+            <button id="mockupBtn" class="ghost-button" type="button">Mockup</button>
             <button id="exportBtn" class="ghost-button" type="button">Export JSON</button>
             <button id="resetBtn" class="ghost-button" type="button">Reset</button>
           </div>
         </header>
 
+        <section class="mockup-panel" id="mockupPanel" aria-label="Site mockup">
+          <div class="mockup-copy">
+            <p class="eyebrow">Preliminary site shape</p>
+            <h2>Frame library, micro-module progress, and interpretive comparison in one workspace.</h2>
+          </div>
+          <div class="mockup-strip" aria-label="Workflow preview">
+            <span>1. Import frame</span>
+            <span>2. Observe cues</span>
+            <span>3. Rate signals</span>
+            <span>4. Map meaning</span>
+            <span>5. Name subtext</span>
+            <span>6. Compare readers</span>
+          </div>
+        </section>
+
         <section class="studio-grid">
           <aside class="image-panel" aria-label="Reference image workspace">
+            <div class="panel-section">
+              <div class="section-title">
+                <h2>Frame Library</h2>
+                <span id="assetCount">0 frames</span>
+              </div>
+              <div id="assetLibrary" class="asset-library"></div>
+            </div>
             <div class="image-stage" id="imageStage">
               <div class="placeholder">
                 <span class="placeholder-mark">+</span>
@@ -37,6 +60,13 @@
               <button id="sampleBtn" class="ghost-button" type="button">Use abstract sample</button>
             </div>
             <p class="rights-note">Public repo mode: keep copyrighted frames out of commits. Local study mode: upload your own references in-browser.</p>
+            <div class="panel-section">
+              <div class="section-title">
+                <h2>Micro-Modules</h2>
+                <span id="completionPercent">0%</span>
+              </div>
+              <div id="moduleChecklist" class="module-checklist"></div>
+            </div>
           </aside>
 
           <section class="coding-panel" aria-label="Expression coding workflow">
@@ -124,6 +154,6 @@
         </section>
       </section>
     </main>
-    <script src="./src/app.js?v=0.2.0" type="module"></script>
+    <script src="./src/app.js?v=0.3.0" type="module"></script>
   </body>
 </html>

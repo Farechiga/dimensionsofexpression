@@ -5,3 +5,5 @@ dist/
 .env.local
 exports/
 local-images/
+assets/private/*
+!assets/private/.gitkeep

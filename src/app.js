@@ -1,5 +1,16 @@
 import { taxonomy } from "./taxonomy.js";
 
+const modules = [
+  { id: "image", label: "Reference image", isComplete: (reading) => Boolean(reading.imageName) },
+  { id: "cues", label: "Visible cue pass", isComplete: (reading) => reading.cues?.length > 0 },
+  { id: "signals", label: "Facial signal ratings", isComplete: (reading) => hasNonDefault(reading.signals, 35) },
+  { id: "axes", label: "Meaning-map axes", isComplete: (reading) => hasNonDefault(reading.axes, 50) },
+  { id: "taxonomy", label: "Nuanced vocabulary", isComplete: (reading) => reading.taxonomyTerms?.length > 0 },
+  { id: "blend", label: "Emotion blend", isComplete: (reading) => Object.keys(reading.blend || {}).length > 0 },
+  { id: "subtext", label: "Name and subtext", isComplete: (reading) => Boolean(reading.name && reading.name !== "Untitled reading" && reading.subtext) },
+  { id: "evidence", label: "Evidence note", isComplete: (reading) => Boolean(reading.evidence) }
+];
+
 const cues = [
   ["Brows", "Inner lift, compression, asymmetry, or grief tension."],
   ["Eyes", "Widening, softness, wetness, squint, gaze target, avoidance."],
@@ -59,12 +70,108 @@ function loadSavedReadings() {
 
 const state = {
   step: 0,
-  readings: loadSavedReadings()
+  readings: loadSavedReadings(),
+  assets: [],
+  currentImage: null
 };
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const slug = (value) => String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+function hasNonDefault(values = {}, defaultValue) {
+  return Object.values(values).some((value) => Number(value) !== defaultValue);
+}
+
+async function loadAssetManifest() {
+  try {
+    const response = await fetch("./assets/manifest.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Manifest unavailable");
+    const manifest = await response.json();
+    state.assets = Array.isArray(manifest.images) ? manifest.images : [];
+  } catch {
+    state.assets = [];
+  }
+  renderAssetLibrary();
+}
+
+function assetTitle(asset) {
+  return asset?.title || asset?.id || asset?.src?.split("/").pop() || "Untitled frame";
+}
+
+function getImageReadings(image = state.currentImage) {
+  if (!image) return [];
+  return state.readings.filter((reading) => reading.imageId === image.id || reading.imageName === image.name || reading.imageName === image.title);
+}
+
+function getLatestReading(image = state.currentImage) {
+  return getImageReadings(image)[0] || null;
+}
+
+function moduleStatus(reading = getLatestReading()) {
+  return modules.map((module) => ({
+    ...module,
+    complete: reading ? module.isComplete(reading) : false
+  }));
+}
+
+function renderAssetLibrary() {
+  const builtIns = [
+    {
+      id: "abstract-demo-face",
+      title: "Abstract demo face",
+      src: "",
+      rightsMode: "generated-demo",
+      notes: "Built-in synthetic sample."
+    }
+  ];
+  const allAssets = [...builtIns, ...state.assets];
+  $("#assetCount").textContent = `${allAssets.length} frame${allAssets.length === 1 ? "" : "s"}`;
+  $("#assetLibrary").innerHTML = allAssets.map((asset) => {
+    const readings = getImageReadings({ id: asset.id, name: asset.title, title: asset.title });
+    const status = moduleStatus(readings[0]);
+    const complete = status.filter((module) => module.complete).length;
+    const percent = Math.round((complete / modules.length) * 100);
+    const selected = state.currentImage?.id === asset.id;
+    return `
+      <button class="asset-card${selected ? " is-selected" : ""}" type="button" data-asset-id="${escapeHtml(asset.id)}">
+        <span class="asset-thumb">${asset.src ? `<img src="${escapeHtml(asset.src)}" alt="">` : "demo"}</span>
+        <span class="asset-meta">
+          <strong>${escapeHtml(assetTitle(asset))}</strong>
+          <small>${escapeHtml(asset.rightsMode || "local-study")} · ${readings.length} reading${readings.length === 1 ? "" : "s"}</small>
+          <span class="progress-track"><span style="width:${percent}%"></span></span>
+        </span>
+        <span class="asset-percent">${percent}%</span>
+      </button>
+    `;
+  }).join("");
+
+  $$(".asset-card").forEach((button) => {
+    button.addEventListener("click", () => {
+      const asset = allAssets.find((item) => item.id === button.dataset.assetId);
+      if (asset) selectAsset(asset);
+    });
+  });
+}
+
+function renderModuleChecklist() {
+  const status = moduleStatus();
+  const complete = status.filter((module) => module.complete).length;
+  const percent = Math.round((complete / modules.length) * 100);
+  $("#completionPercent").textContent = `${percent}%`;
+  $("#moduleChecklist").innerHTML = status.map((module) => `
+    <div class="module-item${module.complete ? " is-complete" : ""}">
+      <span>${module.complete ? "✓" : ""}</span>
+      <strong>${escapeHtml(module.label)}</strong>
+    </div>
+  `).join("");
+}
+
+function setCurrentImage(image) {
+  state.currentImage = image;
+  renderAssetLibrary();
+  renderModuleChecklist();
+}
 
 function buildCues() {
   $("#cueGrid").innerHTML = cues.map(([name, detail]) => `
@@ -154,6 +261,7 @@ function setStep(nextStep) {
   $("#readingForm").classList.toggle("is-saveable", state.step >= 3);
   window.expressionDebug = { step: state.step, readings: state.readings.length };
   renderReadings();
+  renderModuleChecklist();
 }
 
 function collectReading() {
@@ -175,6 +283,7 @@ function collectReading() {
   return {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
+    imageId: state.currentImage?.id || $("#previewImage").dataset.id || "local-upload",
     imageName: $("#previewImage").dataset.name || "local upload or sample",
     name: $("#expressionName").value.trim() || "Untitled reading",
     subtext: $("#subtext").value.trim(),
@@ -191,6 +300,7 @@ function saveReading(event) {
   event.preventDefault();
   state.readings.unshift(collectReading());
   window.localStorage?.setItem("expressionReadings", JSON.stringify(state.readings));
+  renderAssetLibrary();
   setStep(4);
 }
 
@@ -212,6 +322,7 @@ function renderReadings() {
       <article class="reading-card">
         <h3>${escapeHtml(reading.name)}</h3>
         <p>${escapeHtml(reading.subtext || "No subtext entered yet.")}</p>
+        <p class="reading-meta">${escapeHtml(reading.imageName || "Unknown frame")} · ${reading.taxonomyTerms?.length || 0} selected terms</p>
         <div class="mini-bars">
           ${topBlend.map(([label, value]) => miniBar(label, value)).join("") || "<p>No emotion blend values set.</p>"}
         </div>
@@ -262,8 +373,16 @@ function loadImage(file) {
   reader.onload = () => {
     $("#previewImage").src = reader.result;
     $("#previewImage").alt = file.name;
+    $("#previewImage").dataset.id = `upload-${slug(file.name)}`;
     $("#previewImage").dataset.name = file.name;
     $("#imageStage").classList.add("has-image");
+    setCurrentImage({
+      id: `upload-${slug(file.name)}`,
+      title: file.name,
+      name: file.name,
+      src: reader.result,
+      rightsMode: "browser-upload"
+    });
   };
   reader.readAsDataURL(file);
 }
@@ -288,8 +407,35 @@ function useSample() {
   `);
   $("#previewImage").src = `data:image/svg+xml;charset=utf-8,${svg}`;
   $("#previewImage").alt = "Abstract demo face";
+  $("#previewImage").dataset.id = "abstract-demo-face";
   $("#previewImage").dataset.name = "abstract-demo-face";
   $("#imageStage").classList.add("has-image");
+  setCurrentImage({
+    id: "abstract-demo-face",
+    title: "Abstract demo face",
+    name: "abstract-demo-face",
+    src: "",
+    rightsMode: "generated-demo"
+  });
+}
+
+function selectAsset(asset) {
+  if (asset.id === "abstract-demo-face") {
+    useSample();
+    return;
+  }
+  $("#previewImage").src = asset.src;
+  $("#previewImage").alt = assetTitle(asset);
+  $("#previewImage").dataset.id = asset.id;
+  $("#previewImage").dataset.name = assetTitle(asset);
+  $("#imageStage").classList.add("has-image");
+  setCurrentImage({
+    id: asset.id,
+    title: assetTitle(asset),
+    name: assetTitle(asset),
+    src: asset.src,
+    rightsMode: asset.rightsMode || "local-study"
+  });
 }
 
 function exportJson() {
@@ -306,6 +452,7 @@ function resetAll() {
   window.localStorage?.removeItem("expressionReadings");
   state.readings = [];
   $("#readingForm").reset();
+  renderAssetLibrary();
   setStep(0);
 }
 
@@ -313,6 +460,8 @@ buildCues();
 buildSliders();
 buildTaxonomy();
 bindSliders();
+loadAssetManifest();
+renderModuleChecklist();
 
 $$(".step").forEach((button) => button.addEventListener("click", () => setStep(Number(button.dataset.step))));
 $("#backBtn").addEventListener("click", () => setStep(state.step - 1));
@@ -331,4 +480,5 @@ $("#imageStage").addEventListener("drop", (event) => {
 $("#sampleBtn").addEventListener("click", useSample);
 $("#exportBtn").addEventListener("click", exportJson);
 $("#resetBtn").addEventListener("click", resetAll);
+$("#mockupBtn").addEventListener("click", () => $("#mockupPanel").classList.toggle("is-collapsed"));
 setStep(0);

@@ -22,6 +22,9 @@ Then open <http://localhost:5173>.
 
 ## Current Prototype
 
+- Asset drop workflow with `assets/manifest.json`
+- Per-image micro-module completion tracking
+- Preliminary studio mockup panel
 - Progressive labeling workflow
 - Region cue checklist
 - Emotion blend sliders
@@ -42,3 +45,11 @@ The expressive vocabulary lives in `src/taxonomy.js` so categories and terms can
 - Acting vocabulary: objective, obstacle, intention, subtext
 - Laban movement analysis: direct/indirect, strong/light, sudden/sustained, bound/free
 - Animation principles: staging, exaggeration, readable contrast, appeal
+
+## Adding Local Images
+
+1. Put image files in `assets/private/`.
+2. Add entries to `assets/manifest.json`.
+3. Run the local site and select images from the Frame Library.
+
+Images inside `assets/private/` are ignored by Git. This keeps study frames local unless you deliberately move public-safe assets elsewhere.
