@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=0.7.0";
+import { taxonomy } from "./taxonomy.js?v=0.7.2";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -89,7 +89,9 @@ const state = {
   },
   generatedCount: 0,
   imageIndex: 0,
-  generatedImages: []
+  generatedImages: [],
+  imageHistory: [],
+  imageHistoryIndex: -1
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -222,7 +224,7 @@ function confirmImageChange() {
 }
 
 function allBrowsableImages() {
-  return [...state.generatedImages, ...state.assets];
+  return state.assets.length ? state.assets : state.generatedImages;
 }
 
 function ensureGeneratedImages(count = 8) {
@@ -239,9 +241,10 @@ function ensureGeneratedImages(count = 8) {
   }
 }
 
-function showImageAt(index) {
+function showImageAt(index, options = {}) {
   const images = allBrowsableImages();
   if (!images.length) return;
+  const { recordHistory = true } = options;
   state.imageIndex = (index + images.length) % images.length;
   const image = images[state.imageIndex];
   $("#previewImage").src = image.src;
@@ -249,14 +252,34 @@ function showImageAt(index) {
   $("#previewImage").dataset.id = image.id;
   $("#previewImage").dataset.name = assetTitle(image);
   $("#imageStage").classList.add("has-image");
+  if (recordHistory) {
+    state.imageHistory = state.imageHistory.slice(0, state.imageHistoryIndex + 1);
+    state.imageHistory.push(state.imageIndex);
+    state.imageHistoryIndex = state.imageHistory.length - 1;
+  }
   setCurrentImage(image);
+}
+
+function randomImageIndex() {
+  const images = allBrowsableImages();
+  if (images.length <= 1) return state.imageIndex;
+  let nextIndex = state.imageIndex;
+  while (nextIndex === state.imageIndex) {
+    nextIndex = Math.floor(Math.random() * images.length);
+  }
+  return nextIndex;
 }
 
 function changeImage(delta) {
   if (!confirmImageChange()) return;
-  ensureGeneratedImages();
+  if (!state.assets.length) ensureGeneratedImages();
   clearCurrentSelections();
-  showImageAt(state.imageIndex + delta);
+  if (delta < 0 && state.imageHistoryIndex > 0) {
+    state.imageHistoryIndex -= 1;
+    showImageAt(state.imageHistory[state.imageHistoryIndex], { recordHistory: false });
+    return;
+  }
+  showImageAt(randomImageIndex());
 }
 
 function sliderRow(name, options = {}) {
@@ -700,14 +723,18 @@ function seededRandom(seed) {
   };
 }
 
+async function initializeImages() {
+  await loadAssetManifest();
+  if (!state.assets.length) ensureGeneratedImages();
+  showImageAt(randomImageIndex());
+  renderModuleChecklist();
+}
+
 buildSliders();
 buildTaxonomy();
 bindSliders();
 bindBins();
-loadAssetManifest();
-ensureGeneratedImages();
-showImageAt(0);
-renderModuleChecklist();
+initializeImages();
 
 $$(".step").forEach((button) => button.addEventListener("click", () => setStep(Number(button.dataset.step))));
 $("#backBtn").addEventListener("click", () => setStep(state.step - 1));
