@@ -512,6 +512,7 @@ form {
 }
 
 .term-chip > span {
+  font-size: 0.9rem;
   font-weight: 720;
 }
 
@@ -1089,6 +1090,10 @@ form {
   min-height: 24px;
   padding: 0 4px 0 7px;
   font-size: 0.68rem;
+}
+
+.term-chip > span {
+  font-size: 0.82rem;
 }
 
 .term-chip button {
