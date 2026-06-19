@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=0.7.4">
+    <link rel="stylesheet" href="./src/styles.css?v=0.7.5">
   </head>
   <body>
     <main class="app-shell">
@@ -25,6 +25,12 @@
               <button id="nextImageBtn" class="image-arrow image-arrow-right" type="button" aria-label="Next image">›</button>
             </div>
             <div class="panel-section">
+              <label class="character-filter">
+                <span>Character</span>
+                <select id="characterFilter">
+                  <option value="all">All characters</option>
+                </select>
+              </label>
               <div class="section-title">
                 <h2>Progress</h2>
               </div>
@@ -121,6 +127,6 @@
         </section>
       </section>
     </main>
-    <script src="./src/app.js?v=0.7.4" type="module"></script>
+    <script src="./src/app.js?v=0.7.5" type="module"></script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=0.7.4";
+import { taxonomy } from "./taxonomy.js?v=0.7.5";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -63,7 +63,9 @@ const emotions = [
   "Angry",
   "Fearful",
   "Uncomfortable",
-  "Surprised"
+  "Surprised",
+  "Unsure",
+  "Weary"
 ];
 
 function loadSavedReadings() {
@@ -90,8 +92,7 @@ const state = {
   generatedCount: 0,
   imageIndex: 0,
   generatedImages: [],
-  imageHistory: [],
-  imageHistoryIndex: -1
+  characterFilter: "all"
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -122,11 +123,39 @@ async function loadAssetManifest() {
   } catch {
     state.assets = [];
   }
+  renderCharacterFilter();
   renderAssetLibrary();
 }
 
 function assetTitle(asset) {
   return asset?.title || asset?.id || asset?.src?.split("/").pop() || "Untitled frame";
+}
+
+function assetFileName(asset) {
+  return decodeURIComponent(asset?.src?.split("/").pop() || assetTitle(asset));
+}
+
+function assetCharacter(asset) {
+  const baseName = assetFileName(asset).replace(/\.[^.]+$/, "").trim();
+  const underscoreIndex = baseName.indexOf("_");
+  if (underscoreIndex > 0) return baseName.slice(0, underscoreIndex).trim();
+  return baseName.split(/\s+/)[0] || "Unknown";
+}
+
+function characterOptions() {
+  return Array.from(new Set(state.assets.map(assetCharacter))).filter(Boolean).sort((a, b) => a.localeCompare(b));
+}
+
+function renderCharacterFilter() {
+  const select = $("#characterFilter");
+  if (!select) return;
+  const characters = characterOptions();
+  select.innerHTML = [
+    `<option value="all">All characters</option>`,
+    ...characters.map((character) => `<option value="${escapeHtml(character)}">${escapeHtml(character)}</option>`)
+  ].join("");
+  select.value = characters.includes(state.characterFilter) ? state.characterFilter : "all";
+  state.characterFilter = select.value;
 }
 
 function getImageReadings(image = state.currentImage) {
@@ -191,6 +220,7 @@ function renderModuleChecklist() {
 function setCurrentImage(image) {
   state.currentImage = image;
   renderAssetLibrary();
+  renderReadings();
   renderModuleChecklist();
 }
 
@@ -224,7 +254,10 @@ function confirmImageChange() {
 }
 
 function allBrowsableImages() {
-  return state.assets.length ? state.assets : state.generatedImages;
+  if (!state.assets.length) return state.generatedImages;
+  if (state.characterFilter === "all") return state.assets;
+  const filtered = state.assets.filter((asset) => assetCharacter(asset) === state.characterFilter);
+  return filtered.length ? filtered : state.assets;
 }
 
 function ensureGeneratedImages(count = 8) {
@@ -241,10 +274,9 @@ function ensureGeneratedImages(count = 8) {
   }
 }
 
-function showImageAt(index, options = {}) {
+function showImageAt(index) {
   const images = allBrowsableImages();
   if (!images.length) return;
-  const { recordHistory = true } = options;
   state.imageIndex = (index + images.length) % images.length;
   const image = images[state.imageIndex];
   $("#previewImage").src = image.src;
@@ -252,34 +284,14 @@ function showImageAt(index, options = {}) {
   $("#previewImage").dataset.id = image.id;
   $("#previewImage").dataset.name = assetTitle(image);
   $("#imageStage").classList.add("has-image");
-  if (recordHistory) {
-    state.imageHistory = state.imageHistory.slice(0, state.imageHistoryIndex + 1);
-    state.imageHistory.push(state.imageIndex);
-    state.imageHistoryIndex = state.imageHistory.length - 1;
-  }
   setCurrentImage(image);
-}
-
-function randomImageIndex() {
-  const images = allBrowsableImages();
-  if (images.length <= 1) return state.imageIndex;
-  let nextIndex = state.imageIndex;
-  while (nextIndex === state.imageIndex) {
-    nextIndex = Math.floor(Math.random() * images.length);
-  }
-  return nextIndex;
 }
 
 function changeImage(delta) {
   if (!confirmImageChange()) return;
   if (!state.assets.length) ensureGeneratedImages();
   clearCurrentSelections();
-  if (delta < 0 && state.imageHistoryIndex > 0) {
-    state.imageHistoryIndex -= 1;
-    showImageAt(state.imageHistory[state.imageHistoryIndex], { recordHistory: false });
-    return;
-  }
-  showImageAt(randomImageIndex());
+  showImageAt(state.imageIndex + delta);
 }
 
 function sliderRow(name, options = {}) {
@@ -448,14 +460,16 @@ function saveReading(event) {
 function renderReadings() {
   const list = $("#readingList");
   if (!list) return;
+  const imageReadings = getImageReadings();
+  const imageName = assetTitle(state.currentImage);
 
-  if (!state.readings.length) {
-    list.innerHTML = `<div class="reading-card"><h3>No readings yet</h3><p>Save a reading to start building a comparison cloud.</p></div>`;
-    $("#consensus").innerHTML = `<p class="rights-note">Consensus appears after at least one reading.</p>`;
+  if (!imageReadings.length) {
+    list.innerHTML = `<div class="reading-card"><h3>No readings for this image yet</h3><p>Save a reading for ${escapeHtml(imageName)} to compare interpretations of this frame.</p></div>`;
+    $("#consensus").innerHTML = `<p class="rights-note">Consensus appears after this image has at least one reading.</p>`;
     return;
   }
 
-  list.innerHTML = state.readings.map((reading) => {
+  list.innerHTML = imageReadings.map((reading) => {
     const topBlend = Object.entries(reading.blend)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 4);
@@ -471,7 +485,7 @@ function renderReadings() {
     `;
   }).join("");
 
-  $("#consensus").innerHTML = consensusBars();
+  $("#consensus").innerHTML = consensusBars(imageReadings);
 }
 
 function miniBar(label, value) {
@@ -484,15 +498,15 @@ function miniBar(label, value) {
   `;
 }
 
-function consensusBars() {
+function consensusBars(readings = getImageReadings()) {
   const totals = {};
-  state.readings.forEach((reading) => {
+  readings.forEach((reading) => {
     Object.entries(reading.blend).forEach(([label, value]) => {
       totals[label] = (totals[label] || 0) + value;
     });
   });
   return Object.entries(totals)
-    .map(([label, total]) => [label, Math.round(total / state.readings.length)])
+    .map(([label, total]) => [label, Math.round(total / readings.length)])
     .sort((a, b) => b[1] - a[1])
     .slice(0, 7)
     .map(([label, value]) => miniBar(label, value))
@@ -726,7 +740,7 @@ function seededRandom(seed) {
 async function initializeImages() {
   await loadAssetManifest();
   if (!state.assets.length) ensureGeneratedImages();
-  showImageAt(randomImageIndex());
+  showImageAt(0);
   renderModuleChecklist();
 }
 
@@ -742,6 +756,16 @@ $("#nextBtn").addEventListener("click", () => setStep(state.step + 1));
 $("#readingForm").addEventListener("submit", saveReading);
 $("#prevImageBtn").addEventListener("click", () => changeImage(-1));
 $("#nextImageBtn").addEventListener("click", () => changeImage(1));
+$("#characterFilter").addEventListener("change", (event) => {
+  const previousFilter = state.characterFilter;
+  if (!confirmImageChange()) {
+    event.target.value = previousFilter;
+    return;
+  }
+  state.characterFilter = event.target.value;
+  clearCurrentSelections();
+  showImageAt(0);
+});
 ["expressionName", "subtext", "evidence"].forEach((id) => {
   $(`#${id}`).addEventListener("input", renderModuleChecklist);
 });

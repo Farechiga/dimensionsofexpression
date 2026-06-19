@@ -199,7 +199,11 @@ export const taxonomy = [
       },
       {
         label: "Agitation",
-        terms: ["harried", "frazzled", "rattled", "flustered", "frantic", "strained", "overextended", "restless", "jittery", "panicked", "pressured", "rushed", "scattered", "overloaded", "frayed"]
+        terms: ["harried", "frazzled", "rattled", "flustered", "frantic", "keyed up", "strained", "overextended", "restless", "jittery", "panicked", "pressured", "rushed", "scattered", "overloaded", "frayed"]
+      },
+      {
+        label: "Dysregulated",
+        terms: ["paranoid", "spooked", "jittery", "absent-minded", "lost in thought", "haunted", "dissociated", "unsettled", "skittish", "overstimulated", "disoriented", "on edge", "checked out", "preoccupied", "ungrounded"]
       },
       {
         label: "Postural state",
