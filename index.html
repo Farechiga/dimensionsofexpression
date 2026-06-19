@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=0.7.6">
+    <link rel="stylesheet" href="./src/styles.css?v=0.7.7">
   </head>
   <body>
     <main class="app-shell">
@@ -59,11 +59,11 @@
                   </section>
                   <section class="message-bins" aria-label="Expression message bins">
                     <div class="message-bin" data-bin="external">
-                      <h3>External</h3>
+                      <h3><span>External</span><button class="write-in-button" type="button" data-write-in="external" aria-label="Add external write-in">+</button></h3>
                       <div id="externalBin" class="bin-dropzone"></div>
                     </div>
                     <div class="message-bin" data-bin="internal">
-                      <h3>Internal</h3>
+                      <h3><span>Internal</span><button class="write-in-button" type="button" data-write-in="internal" aria-label="Add internal write-in">+</button></h3>
                       <div id="internalBin" class="bin-dropzone"></div>
                     </div>
                   </section>
@@ -127,6 +127,6 @@
         </section>
       </section>
     </main>
-    <script src="./src/app.js?v=0.7.6" type="module"></script>
+    <script src="./src/app.js?v=0.7.7" type="module"></script>
   </body>
 </html>

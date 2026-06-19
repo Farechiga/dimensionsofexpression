@@ -436,10 +436,33 @@ form {
 }
 
 .message-bin h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   margin: 0;
   padding: 10px 12px;
   border-bottom: 1px solid var(--line);
   color: var(--teal);
+}
+
+.write-in-button {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #c6d8d4;
+  border-radius: 50%;
+  background: #eef5f2;
+  color: var(--teal);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.write-in-button:hover {
+  border-color: var(--teal);
+  background: #fff;
 }
 
 .message-bin.is-over {
@@ -466,6 +489,23 @@ form {
   color: var(--teal);
   font-size: 0.78rem;
   font-weight: 760;
+}
+
+.write-in-form {
+  display: inline-flex;
+  align-items: center;
+}
+
+.write-in-form input {
+  width: 150px;
+  min-height: 28px;
+  border: 1px solid #c6d8d4;
+  border-radius: 8px;
+  padding: 0 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 720;
 }
 
 .taxonomy-card {

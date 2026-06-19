@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=0.7.6";
+import { taxonomy } from "./taxonomy.js?v=0.7.7";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -84,6 +84,7 @@ const state = {
     external: new Set(),
     internal: new Set()
   },
+  writeInBin: null,
   generatedCount: 0,
   imageIndex: 0,
   generatedImages: [],
@@ -679,6 +680,21 @@ function addTermToBin(term, bin) {
   renderModuleChecklist();
 }
 
+function openWriteIn(bin) {
+  if (!state.termsByBin[bin]) return;
+  state.writeInBin = bin;
+  renderBins();
+  $(`#${bin}WriteIn`)?.focus();
+}
+
+function addWriteInTerm(bin, label) {
+  if (!state.termsByBin[bin]) return;
+  const cleanLabel = label.trim();
+  if (!cleanLabel) return;
+  state.writeInBin = null;
+  addTermToBin(`Write-in: ${cleanLabel}`, bin);
+}
+
 function removeTerm(term) {
   state.termsByBin.external.delete(term);
   state.termsByBin.internal.delete(term);
@@ -692,15 +708,33 @@ function renderBins() {
     const target = $(`#${bin}Bin`);
     if (!target) return;
     const terms = Array.from(state.termsByBin[bin]);
-    target.innerHTML = terms.map((term) => `
+    target.innerHTML = `${terms.map((term) => `
       <button class="bin-chip" type="button" data-term="${escapeHtml(term)}">
-        ${escapeHtml(term.split(": ").pop())}
+        ${escapeHtml(displayTerm(term))}
       </button>
-    `).join("");
+    `).join("")}${state.writeInBin === bin ? `
+      <form class="write-in-form" data-write-in-form="${bin}">
+        <input id="${bin}WriteIn" type="text" placeholder="write in" aria-label="${bin} write-in text">
+      </form>
+    ` : ""}`;
     target.querySelectorAll(".bin-chip").forEach((chip) => {
       chip.addEventListener("click", () => removeTerm(chip.dataset.term));
     });
+    target.querySelector("[data-write-in-form]")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      addWriteInTerm(bin, event.target.querySelector("input").value);
+    });
+    target.querySelector(".write-in-form input")?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        state.writeInBin = null;
+        renderBins();
+      }
+    });
   });
+}
+
+function displayTerm(term) {
+  return term.startsWith("Write-in: ") ? term.slice("Write-in: ".length) : term.split(": ").pop();
 }
 
 function bindBins() {
@@ -714,6 +748,9 @@ function bindBins() {
     if (chip) event.dataTransfer.setData("text/plain", chip.dataset.term);
   });
   $$(".message-bin").forEach((bin) => {
+    bin.querySelector("[data-write-in]")?.addEventListener("click", () => {
+      openWriteIn(bin.dataset.bin);
+    });
     bin.addEventListener("dragover", (event) => {
       event.preventDefault();
       bin.classList.add("is-over");
