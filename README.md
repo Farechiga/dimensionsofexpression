@@ -29,24 +29,23 @@ Then open <http://localhost:5173>.
 - Emotion wheel umbrella sliders
 - External/internal vocabulary bins for conflicting messages
 - Expandable taxonomy with multi-select nuanced terms
-- Acting/subtext prompt
-- Local comparison of multiple readings
+- Interpretation/subtext prompt
+- Local comparison of readings per image
 
 ## Taxonomy Backbone
 
 The expressive vocabulary lives in `src/taxonomy.js` so categories and terms can expand without rewriting the interface. The first taxonomy pass draws from:
 
-- FACS and facial coding: visible movement before interpretation
 - Russell/PAD affect models: valence, activation, dominance/control
 - Appraisal theory: novelty, goal relevance, agency, coping, certainty
 - Display rules: masking, leakage, social performance, impression management
-- Acting vocabulary: objective, obstacle, intention, subtext
-- Laban movement analysis: direct/indirect, strong/light, sudden/sustained, bound/free
+- Acting vocabulary: objective and social intention
+- Embodied state vocabulary: held/released breath, tightened/expanded, rooted/unsteady
 
 ## Adding Local Images
 
-1. Put image files in `assets/private/`.
+1. Put image files in `assets/`.
 2. Add entries to `assets/manifest.json`.
-3. Run the local site and select images from the Frame Library.
+3. Run the local site and use the character dropdown plus arrows to browse frames.
 
 Images inside `assets/private/` are ignored by Git. This keeps study frames local unless you deliberately move public-safe assets elsewhere. The static browser app cannot write files back into `assets/`; repository images should be added through the folder and manifest.

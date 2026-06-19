@@ -1,16 +1,11 @@
-import { taxonomy } from "./taxonomy.js?v=0.7.5";
+import { taxonomy } from "./taxonomy.js?v=0.7.6";
 
 const taxonomyOrder = [
   "emotion-wheel",
   "state-bearing",
   "core-affect",
   "appraisal",
-  "social-display",
-  "temporal-narrative",
-  "emotion-blend",
-  "acting-intention",
-  "embodiment",
-  "visible-anatomy"
+  "social-display"
 ];
 const orderedTaxonomy = taxonomyOrder
   .map((id) => taxonomy.find((category) => category.id === id))
@@ -102,12 +97,7 @@ const categoryLabels = {
   "emotion-wheel": "Emotions",
   "core-affect": "Affect",
   "social-display": "Social",
-  "temporal-narrative": "Narrative",
-  "emotion-blend": "Blend",
-  "state-bearing": "State",
-  "acting-intention": "Acting",
-  "embodiment": "Effort",
-  "visible-anatomy": "Evidence"
+  "state-bearing": "State"
 };
 
 function hasNonDefault(values = {}, defaultValue) {
@@ -138,8 +128,16 @@ function assetFileName(asset) {
 function assetCharacter(asset) {
   const baseName = assetFileName(asset).replace(/\.[^.]+$/, "").trim();
   const underscoreIndex = baseName.indexOf("_");
-  if (underscoreIndex > 0) return baseName.slice(0, underscoreIndex).trim();
-  return baseName.split(/\s+/)[0] || "Unknown";
+  const rawName = underscoreIndex > 0 ? baseName.slice(0, underscoreIndex).trim() : baseName.split(/\s+/)[0] || "Unknown";
+  return normalizeCharacterName(rawName);
+}
+
+function normalizeCharacterName(name) {
+  const fixes = {
+    Cinderalla: "Cinderella",
+    Mirable: "Mirabel"
+  };
+  return fixes[name] || name;
 }
 
 function characterOptions() {

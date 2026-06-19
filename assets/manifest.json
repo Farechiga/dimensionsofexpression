@@ -31,6 +31,54 @@
       "rightsMode": "local-study"
     },
     {
+      "id": "belle-defeated-astonished-reflective-empathetic-horrified-compassionate",
+      "title": "Belle defeated astonished reflective empathetic horrified compassionate",
+      "src": "./assets/Belle_defeated astonished reflective empathetic horrified compassionate.png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "belle-interested-skeptical-warm-hopeful-searching-reevaluating",
+      "title": "Belle interested skeptical warm hopeful searching reevaluating",
+      "src": "./assets/Belle_interested skeptical warm hopeful searching reevaluating.png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "belle-kind-accepting-bemused-inrtrigued-adoring-condescending",
+      "title": "Belle kind accepting bemused inrtrigued adoring condescending",
+      "src": "./assets/Belle_kind accepting bemused inrtrigued adoring condescending.png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "bonnie-hopps-reflective-nervous-smile-searching-false-poise-sadness",
+      "title": "Bonnie Hopps Reflective nervous smile searching false poise sadness",
+      "src": "./assets/Bonnie Hopps_Reflective nervous smile searching false poise sadness.png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "cinderalla-humble-ashamed-dignified-sad-unjust",
+      "title": "Cinderella humble ashamed dignified sad unjust",
+      "src": "./assets/Cinderalla_ humble ashamed dignified sad unjust.png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "jo-march-wronged-sorry-injured-sense-of-unfairness-willfulness-and-submission",
+      "title": "Jo March wronged sorry injured sense of unfairness willfulness and submission",
+      "src": "./assets/Jo March_wronged sorry injured sense of unfairness willfulness and submission.png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "judy-hopps-self-satisfied-tuned-out-devious-self-satisfied",
+      "title": "Judy Hopps Self Satisfied Tuned Out Devious Self Satisfied",
+      "src": "./assets/Judy Hopps_Self Satisfied Tuned Out Devious Self Satisfied .png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "judy-hopps-ashamed-present-determined-alert-disappointed",
+      "title": "Judy Hopps ashamed present determined alert disappointed",
+      "src": "./assets/Judy Hopps_ashamed present determined alert disappointed.png",
+      "rightsMode": "local-study"
+    },
+    {
       "id": "mirabel-pained-pride-vindicated-sadness-mixed-with-happiness",
       "title": "Mirabel pained pride vindicated sadness mixed with happiness",
       "src": "./assets/Mirabel_ pained pride vindicated sadness mixed with happiness.png",
@@ -74,8 +122,14 @@
     },
     {
       "id": "mirable-offended-taken-aback-indignant-holding-back-shocked-barely-holding-back-shock",
-      "title": "Mirable offended, taken aback, indignant holding back shocked barely holding back shock",
+      "title": "Mirabel offended, taken aback, indignant holding back shocked barely holding back shock",
       "src": "./assets/Mirable_offended, taken aback, indignant holding back shocked barely holding back shock .png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "nick-wilde-uncomfrotable-freaked-out-embarressed-are-you-hearing-this",
+      "title": "Nick Wilde uncomfrotable, freaked out, embarressed, are you hearing this",
+      "src": "./assets/Nick Wilde_uncomfrotable, freaked out, embarressed, are you hearing this.png",
       "rightsMode": "local-study"
     },
     {
@@ -106,6 +160,12 @@
       "id": "rapunzel-vacant-happiness-oh-thats-great-dying-inside-isn-t-that-nice-extravert-introvert-empty-happiness",
       "title": "Rapunzel vacant happiness, oh thats great, dying inside, isn't that nice, extravert introvert empty happiness",
       "src": "./assets/Rapunzel_vacant happiness, oh thats great, dying inside, isn't that nice, extravert introvert empty happiness.png",
+      "rightsMode": "local-study"
+    },
+    {
+      "id": "wendy-hopeful-courteous-poised-indignant-holding-group",
+      "title": "Wendy hopeful courteous poised indignant holding group",
+      "src": "./assets/Wendy_hopeful courteous poised indignant holding group.png",
       "rightsMode": "local-study"
     }
   ]
