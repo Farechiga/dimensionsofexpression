@@ -1,13 +1,13 @@
-import { taxonomy } from "./taxonomy.js?v=0.7.2";
+import { taxonomy } from "./taxonomy.js?v=0.7.4";
 
 const taxonomyOrder = [
   "emotion-wheel",
+  "state-bearing",
   "core-affect",
   "appraisal",
   "social-display",
   "temporal-narrative",
   "emotion-blend",
-  "state-bearing",
   "acting-intention",
   "embodiment",
   "visible-anatomy"
@@ -98,7 +98,7 @@ const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const slug = (value) => String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const categoryLabels = {
-  "emotion-wheel": "Wheel",
+  "emotion-wheel": "Emotions",
   "core-affect": "Affect",
   "social-display": "Social",
   "temporal-narrative": "Narrative",

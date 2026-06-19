@@ -1,13 +1,13 @@
 export const taxonomy = [
   {
     id: "emotion-wheel",
-    title: "Emotion Wheel",
-    source: "Emotion wheel vocabulary",
-    description: "Broad affect umbrellas with more specific feeling words from the wheel.",
+    title: "Emotions",
+    source: "Emotion vocabulary",
+    description: "Broad affect umbrellas with more specific feeling words.",
     groups: [
       {
         label: "Happy",
-        terms: ["playful", "aroused", "cheeky", "content", "free", "joyful", "interested", "curious", "inquisitive", "proud", "successful", "confident", "accepted", "respected", "valued", "powerful", "courageous", "creative", "peaceful", "loving", "thankful", "trusting", "sensitive", "intimate", "optimistic", "hopeful", "inspired"]
+        terms: ["playful", "cheeky", "content", "free", "joyful", "interested", "curious", "inquisitive", "proud", "successful", "confident", "accepted", "respected", "valued", "powerful", "courageous", "creative", "peaceful", "loving", "thankful", "trusting", "sensitive", "close", "optimistic", "hopeful", "inspired"]
       },
       {
         label: "Sad",
@@ -235,7 +235,7 @@ export const taxonomy = [
 
 export const literatureNotes = [
   "FACS keeps visible movement separate from interpretation by coding action units.",
-  "Russell and PAD models support continuous valence, arousal, and dominance/control ratings.",
+  "Russell and PAD models support continuous valence, activation, and dominance/control ratings.",
   "Appraisal theories describe emotion as evaluation of novelty, goal relevance, agency, coping, and norm fit.",
   "Display-rule research helps name masking, intensifying, suppressing, and socially managed expressions.",
   "Laban and acting vocabularies help translate static expressions into playable intention, obstacle, and embodied effort."

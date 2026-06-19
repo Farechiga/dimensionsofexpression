@@ -37,7 +37,7 @@ Then open <http://localhost:5173>.
 The expressive vocabulary lives in `src/taxonomy.js` so categories and terms can expand without rewriting the interface. The first taxonomy pass draws from:
 
 - FACS and facial coding: visible movement before interpretation
-- Russell/PAD affect models: valence, arousal, dominance/control
+- Russell/PAD affect models: valence, activation, dominance/control
 - Appraisal theory: novelty, goal relevance, agency, coping, certainty
 - Display rules: masking, leakage, social performance, impression management
 - Acting vocabulary: objective, obstacle, intention, subtext
