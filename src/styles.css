@@ -494,10 +494,11 @@ form {
 .write-in-form {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
 }
 
 .write-in-form input {
-  width: 150px;
+  width: 132px;
   min-height: 28px;
   border: 1px solid #c6d8d4;
   border-radius: 8px;
@@ -506,6 +507,17 @@ form {
   color: var(--ink);
   font-size: 0.78rem;
   font-weight: 720;
+}
+
+.write-in-form button {
+  min-height: 28px;
+  border: 1px solid var(--teal);
+  border-radius: 8px;
+  padding: 0 8px;
+  background: var(--teal);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 820;
 }
 
 .taxonomy-card {

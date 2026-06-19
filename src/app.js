@@ -715,6 +715,7 @@ function renderBins() {
     `).join("")}${state.writeInBin === bin ? `
       <form class="write-in-form" data-write-in-form="${bin}">
         <input id="${bin}WriteIn" type="text" placeholder="write in" aria-label="${bin} write-in text">
+        <button type="submit">Save</button>
       </form>
     ` : ""}`;
     target.querySelectorAll(".bin-chip").forEach((chip) => {
