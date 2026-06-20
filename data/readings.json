@@ -1,0 +1,69 @@
+{
+  "readings": [
+    {
+      "id": "reference-belle-defeated-compassionate-shock",
+      "createdAt": "2026-06-19T00:00:00.000Z",
+      "imageId": "belle-defeated-astonished-reflective-empathetic-horrified-compassionate",
+      "imageName": "Belle defeated astonished reflective empathetic horrified compassionate",
+      "source": "Reference assessment",
+      "name": "compassionate shock under strain",
+      "subtext": "I understand what this means, and it hurts to see it. I am trying to stay present for you even though I am alarmed by what I am witnessing.",
+      "evidence": "The brows lift and soften with worry; the eyes stay searching and exposed; the mouth is parted as if mid-response. Her body leans toward the other person, creating an external offering of care while the face carries internal alarm and empathic pain.",
+      "externalTerms": [
+        "Social Display: Objective: to comfort",
+        "Social Display: Objective: to protect",
+        "Social Display: Masking and leakage: controlled face",
+        "Social Display: Audience orientation: offering comfort",
+        "Social Display: Relational stance: pleading",
+        "Social Display: Relational stance: protective",
+        "Appraisal: Time direction: present recognition",
+        "Appraisal: Coping and certainty: bracing",
+        "Affect: Felt body state: held breath",
+        "State and Bearing: Composure: composed"
+      ],
+      "internalTerms": [
+        "Emotions: Disgusted: horrified",
+        "Emotions: Fearful: worried",
+        "Emotions: Fearful: overwhelmed",
+        "Emotions: Sad: vulnerable",
+        "Emotions: Sad: powerless",
+        "Emotions: Sad: hurt",
+        "Emotions: Surprised: dismayed",
+        "Appraisal: Coping and certainty: uncertain outcome",
+        "Appraisal: Goal relation: cost recognized",
+        "Write-in: empathic pain",
+        "State and Bearing: Dysregulated: on edge",
+        "Affect: Felt body state: tightened"
+      ],
+      "signals": {
+        "Brows": 70,
+        "Eyes": 65,
+        "Gaze": 60,
+        "Mouth": 74,
+        "Jaw": 48,
+        "Cheeks and nose": 42,
+        "Head and posture": 55
+      },
+      "signalDescriptors": {
+        "Brows": ["raised inner brows", "softened", "asymmetrical", "lifted in worry"],
+        "Eyes": ["wide", "searching", "alert", "pleading", "soft"],
+        "Gaze": ["direct", "measuring", "seeking safety"],
+        "Mouth": ["parted", "open in shock", "downturned", "suppressed speech"],
+        "Jaw": ["slack", "braced", "held back"],
+        "Cheeks and nose": ["drained", "softened cheeks", "compressed midface"],
+        "Head and posture": ["leaning in", "protective", "unsteady", "offering"]
+      },
+      "blend": {
+        "Fearful": 78,
+        "Sad": 72,
+        "Unsure": 65,
+        "Surprised": 58,
+        "Uncomfortable": 52,
+        "Weary": 38,
+        "Disgusted": 20,
+        "Angry": 12,
+        "Happy": 5
+      }
+    }
+  ]
+}

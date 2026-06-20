@@ -756,11 +756,12 @@ form {
 
 .dashboard-card {
   min-height: 0;
-  overflow: hidden;
+  overflow: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px;
   background: #fcfcfa;
+  scrollbar-width: thin;
 }
 
 .dashboard-card header {
@@ -790,6 +791,31 @@ form {
   color: var(--muted);
   font-size: 0.78rem;
   line-height: 1.35;
+}
+
+.dashboard-selector {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.dashboard-selector span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.dashboard-selector select {
+  width: 100%;
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 3px 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 720;
 }
 
 .dashboard-wide {
@@ -834,8 +860,8 @@ form {
   flex-wrap: wrap;
   align-content: flex-start;
   gap: 5px;
-  max-height: 64px;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 
 .dashboard-chip-list span {
@@ -853,7 +879,7 @@ form {
   display: grid;
   gap: 6px;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .dashboard-bar {

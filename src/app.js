@@ -63,77 +63,7 @@ const emotions = [
   "Weary"
 ];
 
-const referenceReadings = [
-  {
-    id: "reference-belle-defeated-compassionate-shock",
-    createdAt: "2026-06-19T00:00:00.000Z",
-    imageId: "belle-defeated-astonished-reflective-empathetic-horrified-compassionate",
-    imageName: "Belle defeated astonished reflective empathetic horrified compassionate",
-    source: "Reference assessment",
-    name: "compassionate shock under strain",
-    subtext: "I understand what this means, and it hurts to see it. I am trying to stay present for you even though I am alarmed by what I am witnessing.",
-    evidence: "The brows lift and soften with worry; the eyes stay searching and exposed; the mouth is parted as if mid-response. Her body leans toward the other person, creating an external offering of care while the face carries internal alarm and empathic pain.",
-    externalTerms: [
-      "Social Display: Objective: to comfort",
-      "Social Display: Objective: to protect",
-      "Social Display: Masking and leakage: controlled face",
-      "Social Display: Audience orientation: offering comfort",
-      "Social Display: Relational stance: pleading",
-      "Social Display: Relational stance: protective",
-      "Appraisal: Time direction: present recognition",
-      "Appraisal: Coping and certainty: bracing",
-      "Affect: Felt body state: held breath",
-      "State and Bearing: Composure: composed"
-    ],
-    internalTerms: [
-      "Emotions: Disgusted: horrified",
-      "Emotions: Fearful: worried",
-      "Emotions: Fearful: overwhelmed",
-      "Emotions: Sad: vulnerable",
-      "Emotions: Sad: powerless",
-      "Emotions: Sad: hurt",
-      "Emotions: Surprised: dismayed",
-      "Appraisal: Coping and certainty: uncertain outcome",
-      "Appraisal: Goal relation: cost recognized",
-      "Write-in: empathic pain",
-      "State and Bearing: Dysregulated: on edge",
-      "Affect: Felt body state: tightened"
-    ],
-    taxonomyTerms: [],
-    signals: {
-      Brows: 70,
-      Eyes: 65,
-      Gaze: 60,
-      Mouth: 74,
-      Jaw: 48,
-      "Cheeks and nose": 42,
-      "Head and posture": 55
-    },
-    signalDescriptors: {
-      Brows: ["raised inner brows", "softened", "asymmetrical", "lifted in worry"],
-      Eyes: ["wide", "searching", "alert", "pleading", "soft"],
-      Gaze: ["direct", "measuring", "seeking safety"],
-      Mouth: ["parted", "open in shock", "downturned", "suppressed speech"],
-      Jaw: ["slack", "braced", "held back"],
-      "Cheeks and nose": ["drained", "softened cheeks", "compressed midface"],
-      "Head and posture": ["leaning in", "protective", "unsteady", "offering"]
-    },
-    blend: {
-      Fearful: 78,
-      Sad: 72,
-      Unsure: 65,
-      Surprised: 58,
-      Uncomfortable: 52,
-      Weary: 38,
-      Disgusted: 20,
-      Angry: 12,
-      Happy: 5
-    }
-  }
-].map((reading) => ({
-  ...reading,
-  taxonomyTerms: [...reading.externalTerms, ...reading.internalTerms]
-}));
+const readingsDatabasePath = "./data/readings.json";
 
 function loadSavedReadings() {
   try {
@@ -148,6 +78,7 @@ function loadSavedReadings() {
 const state = {
   step: 0,
   readings: loadSavedReadings(),
+  databaseReadings: [],
   assets: [],
   currentImage: null,
   taxonomyIndex: 0,
@@ -160,7 +91,8 @@ const state = {
   generatedCount: 0,
   imageIndex: 0,
   generatedImages: [],
-  characterFilter: "all"
+  characterFilter: "all",
+  dashboardReadingId: ""
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -188,6 +120,19 @@ async function loadAssetManifest() {
   }
   renderCharacterFilter();
   renderAssetLibrary();
+}
+
+async function loadReadingDatabase() {
+  try {
+    const response = await fetch(readingsDatabasePath, { cache: "no-store" });
+    if (!response.ok) throw new Error("Readings database unavailable");
+    const database = await response.json();
+    state.databaseReadings = Array.isArray(database.readings)
+      ? database.readings.map(normalizeSavedReading)
+      : [];
+  } catch {
+    state.databaseReadings = [];
+  }
 }
 
 function assetTitle(asset) {
@@ -230,7 +175,7 @@ function renderCharacterFilter() {
 }
 
 function allReadings() {
-  return [...state.readings, ...referenceReadings];
+  return [...state.readings, ...state.databaseReadings];
 }
 
 function getImageReadings(image = state.currentImage) {
@@ -604,11 +549,42 @@ function hasDraftContent(draft) {
 }
 
 function dashboardReading() {
+  const options = dashboardReadingOptions();
+  const selected = options.find((option) => option.id === state.dashboardReadingId) || options[0];
+  state.dashboardReadingId = selected.id;
+  return selected.reading;
+}
+
+function dashboardReadingOptions() {
   const draft = currentDraft();
-  if (hasDraftContent(draft)) return { ...draft, source: "Current draft" };
-  const latest = getLatestReading();
-  if (latest) return { ...normalizeSavedReading(latest), source: latest.source || "Latest saved reading" };
-  return { ...draft, source: "No coding yet" };
+  const options = [];
+
+  if (hasDraftContent(draft)) {
+    options.push({
+      id: "current-draft",
+      label: "Current draft",
+      reading: { ...draft, source: "Current draft" }
+    });
+  }
+
+  getImageReadings().forEach((reading, index) => {
+    const normalized = normalizeSavedReading(reading);
+    options.push({
+      id: normalized.id || `reading-${index}`,
+      label: `${normalized.source || "Saved reading"}: ${normalized.name || `Reading ${index + 1}`}`,
+      reading: { ...normalized, source: normalized.source || "Saved reading" }
+    });
+  });
+
+  if (!options.length) {
+    options.push({
+      id: "empty-dashboard",
+      label: "No coding yet",
+      reading: { ...draft, source: "No coding yet" }
+    });
+  }
+
+  return options;
 }
 
 function renderDashboard() {
@@ -616,6 +592,7 @@ function renderDashboard() {
   if (!panel) return;
 
   const reading = dashboardReading();
+  const dashboardOptions = dashboardReadingOptions();
   const imageReadings = getImageReadings();
   const status = moduleStatus({ ...reading, savedReadings: imageReadings.length });
   const descriptors = flattenSignalDescriptors(reading.signalDescriptors);
@@ -628,8 +605,16 @@ function renderDashboard() {
   panel.innerHTML = `
     <section class="dashboard-card dashboard-overview">
       <header><h3>Overview</h3><span>${escapeHtml(reading.source)}</span></header>
+      <label class="dashboard-selector">
+        <span>Interpretation</span>
+        <select id="dashboardReadingSelect">
+          ${dashboardOptions.map((option) => `
+            <option value="${escapeHtml(option.id)}"${option.id === state.dashboardReadingId ? " selected" : ""}>${escapeHtml(option.label)}</option>
+          `).join("")}
+        </select>
+      </label>
       <div class="dashboard-stats">
-        <strong>${imageReadings.length}</strong><span>saved reading${imageReadings.length === 1 ? "" : "s"}</span>
+        <strong>${imageReadings.length}</strong><span>interpretation${imageReadings.length === 1 ? "" : "s"}</span>
         <strong>${status.filter((item) => item.complete).length}/${status.length}</strong><span>modules</span>
       </div>
       <div class="dashboard-progress">
@@ -674,6 +659,11 @@ function renderDashboard() {
       <div class="dashboard-bars">${consensusHtml}</div>
     </section>
   `;
+
+  $("#dashboardReadingSelect")?.addEventListener("change", (event) => {
+    state.dashboardReadingId = event.target.value;
+    renderDashboard();
+  });
 }
 
 function dashboardChips(terms = []) {
@@ -802,11 +792,17 @@ function emptyDraft() {
 }
 
 function normalizeSavedReading(reading) {
+  const externalTerms = reading.externalTerms || [];
+  const internalTerms = reading.internalTerms || [];
   return {
     ...emptyDraft(),
     ...reading,
-    externalTerms: reading.externalTerms || [],
-    internalTerms: reading.internalTerms || [],
+    externalTerms,
+    internalTerms,
+    taxonomyTerms: reading.taxonomyTerms || [...externalTerms, ...internalTerms],
+    signals: reading.signals || {},
+    signalDescriptors: reading.signalDescriptors || {},
+    blend: reading.blend || {},
     savedReadings: 1
   };
 }
@@ -960,7 +956,7 @@ function seededRandom(seed) {
 }
 
 async function initializeImages() {
-  await loadAssetManifest();
+  await Promise.all([loadAssetManifest(), loadReadingDatabase()]);
   if (!state.assets.length) ensureGeneratedImages();
   showImageAt(0);
   renderModuleChecklist();
