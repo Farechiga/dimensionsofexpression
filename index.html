@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=0.7.8">
+    <link rel="stylesheet" href="./src/styles.css?v=0.7.9">
   </head>
   <body>
     <main class="app-shell">
@@ -45,6 +45,7 @@
               <button class="step" type="button" data-step="2">Signals</button>
               <button class="step" type="button" data-step="3">Interpret</button>
               <button class="step" type="button" data-step="4">Compare</button>
+              <button class="step" type="button" data-step="5">Dashboard</button>
             </nav>
 
             <form id="readingForm">
@@ -117,6 +118,13 @@
                 </div>
               </section>
 
+              <section class="screen" data-screen="5">
+                <div class="screen-head">
+                  <h2>Dashboard</h2>
+                </div>
+                <div id="dashboardPanel" class="dashboard-layout"></div>
+              </section>
+
               <div class="form-actions">
                 <button id="backBtn" class="ghost-button" type="button">Back</button>
                 <button id="nextBtn" class="primary-button" type="button">Next</button>
@@ -127,6 +135,6 @@
         </section>
       </section>
     </main>
-    <script src="./src/app.js?v=0.7.8" type="module"></script>
+    <script src="./src/app.js?v=0.7.9" type="module"></script>
   </body>
 </html>

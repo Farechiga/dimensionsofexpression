@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=0.7.7";
+import { taxonomy } from "./taxonomy.js?v=0.7.9";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -220,6 +220,7 @@ function setCurrentImage(image) {
   state.currentImage = image;
   renderAssetLibrary();
   renderReadings();
+  renderDashboard();
   renderModuleChecklist();
 }
 
@@ -409,14 +410,15 @@ function bindSliders() {
 }
 
 function setStep(nextStep) {
-  state.step = Math.max(0, Math.min(4, nextStep));
+  state.step = Math.max(0, Math.min(5, nextStep));
   $$(".step").forEach((button) => button.classList.toggle("is-active", Number(button.dataset.step) === state.step));
   $$(".screen").forEach((screen) => screen.classList.toggle("is-active", Number(screen.dataset.screen) === state.step));
   $("#backBtn").disabled = state.step === 0;
-  $("#readingForm").classList.toggle("is-final", state.step === 4);
+  $("#readingForm").classList.toggle("is-final", state.step === 5);
   $("#readingForm").classList.toggle("is-saveable", state.step >= 3);
   window.expressionDebug = { step: state.step, readings: state.readings.length };
   renderReadings();
+  renderDashboard();
   renderModuleChecklist();
 }
 
@@ -510,6 +512,114 @@ function consensusBars(readings = getImageReadings()) {
     .slice(0, 7)
     .map(([label, value]) => miniBar(label, value))
     .join("") || `<p class="rights-note">No blend data yet.</p>`;
+}
+
+function hasDraftContent(draft) {
+  return Boolean(
+    draft.externalTerms.length ||
+    draft.internalTerms.length ||
+    Object.keys(draft.blend || {}).length ||
+    hasNonDefault(draft.signals, 0) ||
+    Object.keys(draft.signalDescriptors || {}).length ||
+    draft.name ||
+    draft.subtext ||
+    draft.evidence
+  );
+}
+
+function dashboardReading() {
+  const draft = currentDraft();
+  if (hasDraftContent(draft)) return { ...draft, source: "Current draft" };
+  const latest = getLatestReading();
+  if (latest) return { ...normalizeSavedReading(latest), source: "Latest saved reading" };
+  return { ...draft, source: "No coding yet" };
+}
+
+function renderDashboard() {
+  const panel = $("#dashboardPanel");
+  if (!panel) return;
+
+  const reading = dashboardReading();
+  const imageReadings = getImageReadings();
+  const status = moduleStatus({ ...reading, savedReadings: imageReadings.length });
+  const descriptors = flattenSignalDescriptors(reading.signalDescriptors);
+  const consensusHtml = imageReadings.length ? consensusBars(imageReadings) : `<em>No saved readings yet</em>`;
+  const topBlend = emotions
+    .map((emotion) => [emotion, Number(reading.blend?.[emotion] || 0)])
+    .sort((a, b) => b[1] - a[1]);
+  const signalRows = signalAttributes.map((attribute) => [attribute.name, Number(reading.signals?.[attribute.name] || 0)]);
+
+  panel.innerHTML = `
+    <section class="dashboard-card dashboard-overview">
+      <header><h3>Overview</h3><span>${escapeHtml(reading.source)}</span></header>
+      <div class="dashboard-stats">
+        <strong>${imageReadings.length}</strong><span>saved reading${imageReadings.length === 1 ? "" : "s"}</span>
+        <strong>${status.filter((item) => item.complete).length}/${status.length}</strong><span>modules</span>
+      </div>
+      <div class="dashboard-progress">
+        ${status.map((item) => `<span class="${item.complete ? "is-complete" : ""}" title="${escapeHtml(item.label)}"></span>`).join("")}
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-vocab">
+      <header><h3>External</h3><span>${reading.externalTerms.length}</span></header>
+      <div class="dashboard-chip-list">${dashboardChips(reading.externalTerms)}</div>
+      <header><h3>Internal</h3><span>${reading.internalTerms.length}</span></header>
+      <div class="dashboard-chip-list">${dashboardChips(reading.internalTerms)}</div>
+    </section>
+
+    <section class="dashboard-card">
+      <header><h3>Emotion</h3><span>blend</span></header>
+      <div class="dashboard-bars">
+        ${topBlend.map(([label, value]) => dashboardBar(label, value)).join("")}
+      </div>
+    </section>
+
+    <section class="dashboard-card">
+      <header><h3>Signals</h3><span>intensity</span></header>
+      <div class="dashboard-bars">
+        ${signalRows.map(([label, value]) => dashboardBar(label, value)).join("")}
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-wide">
+      <header><h3>Interpretation</h3><span>${escapeHtml(reading.name || "Untitled")}</span></header>
+      <p>${escapeHtml(reading.subtext || "No subtext yet.")}</p>
+      <p>${escapeHtml(reading.evidence || "No evidence note yet.")}</p>
+    </section>
+
+    <section class="dashboard-card">
+      <header><h3>Descriptors</h3><span>${descriptors.length}</span></header>
+      <div class="dashboard-chip-list">${dashboardChips(descriptors)}</div>
+    </section>
+
+    <section class="dashboard-card">
+      <header><h3>Consensus</h3><span>this image</span></header>
+      <div class="dashboard-bars">${consensusHtml}</div>
+    </section>
+  `;
+}
+
+function dashboardChips(terms = []) {
+  return terms.length
+    ? terms.map((term) => `<span>${escapeHtml(displayTerm(term))}</span>`).join("")
+    : `<em>empty</em>`;
+}
+
+function dashboardBar(label, value) {
+  return `
+    <div class="dashboard-bar">
+      <span>${escapeHtml(label)}</span>
+      <div><i style="width:${Math.max(0, Math.min(100, value))}%"></i></div>
+      <b>${value}</b>
+    </div>
+  `;
+}
+
+function flattenSignalDescriptors(descriptors = {}) {
+  return Object.entries(descriptors).flatMap(([attribute, terms]) => (
+    (terms || []).map((term) => `${attribute}: ${term}`)
+  ));
 }
 
 function escapeHtml(value) {
