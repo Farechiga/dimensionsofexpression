@@ -15,7 +15,7 @@ const modules = [
   { id: "image", label: "Image", isComplete: (draft) => Boolean(draft.imageName) },
   { id: "vocabulary", label: "Vocabulary", isComplete: (draft) => draft.externalTerms?.length > 0 || draft.internalTerms?.length > 0 },
   { id: "emotion", label: "Emotion", isComplete: (draft) => Object.keys(draft.blend || {}).length > 0 },
-  { id: "signals", label: "Signals", isComplete: (draft) => hasNonDefault(draft.signals, 0) || Object.keys(draft.signalDescriptors || {}).length > 0 },
+  { id: "signals", label: "Features Activated", isComplete: (draft) => hasNonDefault(draft.signals, 0) || Object.keys(draft.signalDescriptors || {}).length > 0 },
   { id: "interpret", label: "Interpret", isComplete: (draft) => Boolean(draft.name && draft.name !== "Untitled reading" && draft.subtext && draft.evidence) },
   { id: "compare", label: "Compare", isComplete: (draft) => draft.savedReadings > 0 }
 ];
@@ -51,16 +51,32 @@ const signalAttributes = [
   }
 ];
 
-const emotions = [
-  "Happy",
-  "Sad",
-  "Disgusted",
-  "Angry",
-  "Fearful",
-  "Uncomfortable",
-  "Surprised",
-  "Unsure",
-  "Weary"
+const emotionFamilies = [
+  {
+    name: "Anger",
+    defaults: ["Angry", "Exasperated"],
+    terms: ["Angry", "Irritable", "Annoyed", "Aggravated", "Envy", "Resentful", "Jealous", "Disgust", "Contempt", "Revolted", "Exasperated", "Frustrated", "Agitated", "Rage", "Hostile", "Hate"]
+  },
+  {
+    name: "Sadness",
+    defaults: ["Sad", "Depressed"],
+    terms: ["Sad", "Suffering", "Agony", "Hurt", "Depressed", "Sorrow", "Disappointed", "Dismayed", "Displeased", "Shameful", "Regretful", "Guilty", "Neglected", "Isolated", "Lonely", "Despair", "Grief", "Powerless"]
+  },
+  {
+    name: "Surprise",
+    defaults: ["Dismayed", "Surprised"],
+    terms: ["Surprised", "Stunned", "Shocked", "Confused", "Dismayed", "Disillusioned", "Amazed", "Perplexed", "Astonished", "Overcome", "Awe-struck", "Speechless", "Moved", "Astounded", "Stimulated", "Touched"]
+  },
+  {
+    name: "Joy",
+    defaults: ["Delighted", "Excited"],
+    terms: ["Joyful", "Content", "Pleased", "Satisfied", "Amused", "Happy", "Jovial", "Delighted", "Cheerful", "Blissful", "Triumphant", "Proud", "Illustrious", "Eager", "Optimistic", "Hopeful", "Excited", "Enthusiastic", "Zeal", "Euphoric", "Elation", "Jubilation", "Enchanted"]
+  },
+  {
+    name: "Fear",
+    defaults: ["Frightened", "Anxious"],
+    terms: ["Fearful", "Scared", "Frightened", "Helpless", "Terror", "Panic", "Hysterical", "Insecure", "Inferior", "Inadequate", "Nervous", "Worried", "Anxious", "Horror", "Mortified", "Dread"]
+  }
 ];
 
 const readingsDatabasePath = "./data/readings.json";
@@ -339,8 +355,14 @@ function buildSliders() {
   $("#signalSliders").innerHTML = signalAttributes.map((attribute) => {
     const id = slug(attribute.name);
     return `
-      <article class="signal-card">
-        ${sliderRow(attribute.name, { value: 0 })}
+      <article class="feature-row">
+        <div class="feature-control">
+          <div class="feature-heading">
+            <strong>${escapeHtml(attribute.name)}</strong>
+            <span data-output="${id}">0</span>
+          </div>
+          <input id="${id}" name="${id}" type="range" min="0" max="100" value="0" data-slider>
+        </div>
         <div class="descriptor-list">
           ${attribute.terms.map((term) => `
             <label class="descriptor-chip">
@@ -352,15 +374,25 @@ function buildSliders() {
       </article>
     `;
   }).join("");
-  $("#emotionBlend").innerHTML = emotions.map((emotion) => {
-    const id = `emotion-${slug(emotion)}`;
-    return `
-      <div class="blend-chip">
-        <label for="${id}"><span>${emotion}</span><span data-output="${id}">0</span></label>
-        <input id="${id}" name="${id}" type="range" min="0" max="100" value="0" data-slider>
-      </div>
-    `;
-  }).join("");
+  $("#emotionBlend").innerHTML = emotionFamilies.flatMap((family, familyIndex) => (
+    family.defaults.map((defaultTerm, slotIndex) => {
+      const id = `emotion-slot-${familyIndex}-${slotIndex}`;
+      return `
+        <div class="blend-chip" data-emotion-family="${escapeHtml(family.name)}">
+          <label for="${id}">
+            <span class="emotion-family">${escapeHtml(family.name)}</span>
+            <span data-output="${id}">0</span>
+          </label>
+          <select class="emotion-term-select" aria-label="${escapeHtml(`${family.name} emotion ${slotIndex + 1}`)}">
+            ${family.terms.map((term) => `
+              <option value="${escapeHtml(term)}"${term === defaultTerm ? " selected" : ""}>${escapeHtml(term)}</option>
+            `).join("")}
+          </select>
+          <input id="${id}" name="${id}" type="range" min="0" max="100" value="0" data-slider>
+        </div>
+      `;
+    })
+  )).join("");
 }
 
 function buildTaxonomy() {
@@ -428,6 +460,19 @@ function bindSliders() {
   $$("input[name='signalDescriptor']").forEach((input) => {
     input.addEventListener("change", renderModuleChecklist);
   });
+  $$(".emotion-term-select").forEach((select) => {
+    select.addEventListener("change", renderModuleChecklist);
+  });
+}
+
+function collectEmotionBlend() {
+  const blend = {};
+  $$(".blend-chip").forEach((chip) => {
+    const label = chip.querySelector(".emotion-term-select")?.value;
+    const value = Number(chip.querySelector("input[type='range']")?.value || 0);
+    if (label && value > 0) blend[label] = Math.max(blend[label] || 0, value);
+  });
+  return blend;
 }
 
 function setStep(nextStep) {
@@ -449,10 +494,7 @@ function collectReading() {
     return [attribute.name, Number($(`#${id}`).value)];
   }));
   const signalDescriptors = collectSignalDescriptors();
-  const blend = Object.fromEntries(emotions.map((emotion) => {
-    const id = `emotion-${slug(emotion)}`;
-    return [emotion, Number($(`#${id}`).value)];
-  }).filter(([, value]) => value > 0));
+  const blend = collectEmotionBlend();
 
   return {
     id: crypto.randomUUID(),
@@ -487,7 +529,7 @@ function renderReadings() {
 
   if (!imageReadings.length) {
     list.innerHTML = `<div class="reading-card"><h3>No readings for this image yet</h3><p>Save a reading for ${escapeHtml(imageName)} to compare interpretations of this frame.</p></div>`;
-    $("#consensus").innerHTML = `<p class="rights-note">Consensus appears after this image has at least one reading.</p>`;
+    $("#consensus").innerHTML = `<p class="empty-state">No additional assessment yet.</p>`;
     return;
   }
 
@@ -521,9 +563,12 @@ function miniBar(label, value) {
 }
 
 function consensusBars(readings = getImageReadings()) {
+  if (readings.length < 2) {
+    return `<p class="empty-state">No additional assessment yet.</p>`;
+  }
   const totals = {};
   readings.forEach((reading) => {
-    Object.entries(reading.blend).forEach(([label, value]) => {
+    Object.entries(reading.blend || {}).forEach(([label, value]) => {
       totals[label] = (totals[label] || 0) + value;
     });
   });
@@ -594,17 +639,18 @@ function renderDashboard() {
   const reading = dashboardReading();
   const dashboardOptions = dashboardReadingOptions();
   const imageReadings = getImageReadings();
-  const status = moduleStatus({ ...reading, savedReadings: imageReadings.length });
-  const descriptors = flattenSignalDescriptors(reading.signalDescriptors);
-  const consensusHtml = imageReadings.length ? consensusBars(imageReadings) : `<em>No saved readings yet</em>`;
-  const topBlend = emotions
-    .map((emotion) => [emotion, Number(reading.blend?.[emotion] || 0)])
+  const consensusHtml = consensusBars(imageReadings);
+  const topBlend = Object.entries(reading.blend || {})
+    .map(([emotion, value]) => [emotion, Number(value || 0)])
     .sort((a, b) => b[1] - a[1]);
-  const signalRows = signalAttributes.map((attribute) => [attribute.name, Number(reading.signals?.[attribute.name] || 0)]);
+  const featureRows = signalAttributes.map((attribute) => ({
+    name: attribute.name,
+    value: Number(reading.signals?.[attribute.name] || 0),
+    descriptors: reading.signalDescriptors?.[attribute.name] || []
+  }));
 
   panel.innerHTML = `
-    <section class="dashboard-card dashboard-overview">
-      <header><h3>Overview</h3><span>${escapeHtml(reading.source)}</span></header>
+    <div class="dashboard-toolbar">
       <label class="dashboard-selector">
         <span>Interpretation</span>
         <select id="dashboardReadingSelect">
@@ -613,50 +659,42 @@ function renderDashboard() {
           `).join("")}
         </select>
       </label>
-      <div class="dashboard-stats">
-        <strong>${imageReadings.length}</strong><span>interpretation${imageReadings.length === 1 ? "" : "s"}</span>
-        <strong>${status.filter((item) => item.complete).length}/${status.length}</strong><span>modules</span>
-      </div>
-      <div class="dashboard-progress">
-        ${status.map((item) => `<span class="${item.complete ? "is-complete" : ""}" title="${escapeHtml(item.label)}"></span>`).join("")}
+      <span>${imageReadings.length} interpretation${imageReadings.length === 1 ? "" : "s"} for this image</span>
+    </div>
+
+    <section class="dashboard-card dashboard-external">
+      <header><h3>External</h3><span>${reading.externalTerms.length}</span></header>
+      <div class="dashboard-chip-list">${dashboardChips(reading.externalTerms)}</div>
+    </section>
+
+    <section class="dashboard-card dashboard-emotion">
+      <header><h3>Emotion</h3><span>blend</span></header>
+      <div class="dashboard-bars">
+        ${topBlend.length ? topBlend.map(([label, value]) => dashboardBar(label, value)).join("") : `<p class="empty-state">No emotion activation yet.</p>`}
       </div>
     </section>
 
-    <section class="dashboard-card dashboard-vocab">
-      <header><h3>External</h3><span>${reading.externalTerms.length}</span></header>
-      <div class="dashboard-chip-list">${dashboardChips(reading.externalTerms)}</div>
+    <section class="dashboard-card dashboard-consensus">
+      <header><h3>Consensus</h3><span>${imageReadings.length > 1 ? `${imageReadings.length} assessments averaged` : "this image"}</span></header>
+      <div class="dashboard-bars">${consensusHtml}</div>
+    </section>
+
+    <section class="dashboard-card dashboard-features">
+      <header><h3>Features Activated</h3><span>intensity and descriptors</span></header>
+      <div class="dashboard-feature-list">
+        ${featureRows.map((feature) => dashboardFeatureRow(feature)).join("")}
+      </div>
+    </section>
+
+    <section class="dashboard-card dashboard-internal">
       <header><h3>Internal</h3><span>${reading.internalTerms.length}</span></header>
       <div class="dashboard-chip-list">${dashboardChips(reading.internalTerms)}</div>
     </section>
 
-    <section class="dashboard-card">
-      <header><h3>Emotion</h3><span>blend</span></header>
-      <div class="dashboard-bars">
-        ${topBlend.map(([label, value]) => dashboardBar(label, value)).join("")}
-      </div>
-    </section>
-
-    <section class="dashboard-card">
-      <header><h3>Signals</h3><span>intensity</span></header>
-      <div class="dashboard-bars">
-        ${signalRows.map(([label, value]) => dashboardBar(label, value)).join("")}
-      </div>
-    </section>
-
-    <section class="dashboard-card dashboard-wide">
+    <section class="dashboard-card dashboard-interpretation">
       <header><h3>Interpretation</h3><span>${escapeHtml(reading.name || "Untitled")}</span></header>
       <p>${escapeHtml(reading.subtext || "No subtext yet.")}</p>
       <p>${escapeHtml(reading.evidence || "No evidence note yet.")}</p>
-    </section>
-
-    <section class="dashboard-card">
-      <header><h3>Descriptors</h3><span>${descriptors.length}</span></header>
-      <div class="dashboard-chip-list">${dashboardChips(descriptors)}</div>
-    </section>
-
-    <section class="dashboard-card">
-      <header><h3>Consensus</h3><span>this image</span></header>
-      <div class="dashboard-bars">${consensusHtml}</div>
     </section>
   `;
 
@@ -682,10 +720,19 @@ function dashboardBar(label, value) {
   `;
 }
 
-function flattenSignalDescriptors(descriptors = {}) {
-  return Object.entries(descriptors).flatMap(([attribute, terms]) => (
-    (terms || []).map((term) => `${attribute}: ${term}`)
-  ));
+function dashboardFeatureRow(feature) {
+  return `
+    <div class="dashboard-feature-row">
+      <strong>${escapeHtml(feature.name)}</strong>
+      <div class="dashboard-feature-meter"><i style="width:${Math.max(0, Math.min(100, feature.value))}%"></i></div>
+      <b>${feature.value}</b>
+      <div class="dashboard-feature-descriptors">
+        ${feature.descriptors.length
+          ? feature.descriptors.map((term) => `<span>${escapeHtml(term)}</span>`).join("")
+          : `<em>none selected</em>`}
+      </div>
+    </div>
+  `;
 }
 
 function escapeHtml(value) {
@@ -815,10 +862,7 @@ function currentDraft() {
 }
 
 function collectDraftFields() {
-  const blend = Object.fromEntries(emotions.map((emotion) => {
-    const input = $(`#emotion-${slug(emotion)}`);
-    return [emotion, Number(input?.value || 0)];
-  }).filter(([, value]) => value > 0));
+  const blend = collectEmotionBlend();
   const signals = Object.fromEntries(signalAttributes.map((attribute) => {
     const input = $(`#${slug(attribute.name)}`);
     return [attribute.name, Number(input?.value || 0)];
