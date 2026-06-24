@@ -93,11 +93,52 @@ const radarColors = ["#246a73", "#bd5d4e", "#7a6fa5", "#c99a2e", "#577a4a", "#9a
 
 const readingsDatabasePath = "./data/readings.json";
 
+function sortedEntries(values = {}, transform = (value) => value) {
+  return Object.fromEntries(
+    Object.entries(values)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, value]) => [key, transform(value)])
+  );
+}
+
+function readingFingerprint(reading = {}) {
+  return JSON.stringify({
+    imageId: reading.imageId || "",
+    imageName: reading.imageName || "",
+    name: reading.name === "Untitled reading" ? "" : (reading.name || ""),
+    subtext: reading.subtext || "",
+    evidence: reading.evidence || "",
+    externalTerms: [...(reading.externalTerms || [])].sort(),
+    internalTerms: [...(reading.internalTerms || [])].sort(),
+    blend: sortedEntries(reading.blend, (value) => Number(value) || 0),
+    signals: sortedEntries(reading.signals, (value) => Number(value) || 0),
+    signalDescriptors: sortedEntries(
+      reading.signalDescriptors,
+      (terms) => [...(terms || [])].sort()
+    )
+  });
+}
+
+function deduplicateReadings(readings = []) {
+  const fingerprints = new Set();
+  return readings.filter((reading) => {
+    const fingerprint = readingFingerprint(reading);
+    if (fingerprints.has(fingerprint)) return false;
+    fingerprints.add(fingerprint);
+    return true;
+  });
+}
+
 function loadSavedReadings() {
   try {
     const saved = window.localStorage?.getItem("expressionReadings");
     const parsed = saved ? JSON.parse(saved) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    const uniqueReadings = deduplicateReadings(parsed);
+    if (uniqueReadings.length !== parsed.length) {
+      window.localStorage?.setItem("expressionReadings", JSON.stringify(uniqueReadings));
+    }
+    return uniqueReadings;
   } catch {
     return [];
   }
@@ -120,7 +161,8 @@ const state = {
   imageIndex: 0,
   generatedImages: [],
   characterFilter: "all",
-  dashboardReadingId: ""
+  dashboardReadingId: "",
+  lastSavedSignature: ""
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -276,6 +318,7 @@ function setCurrentImage(image) {
 function clearCurrentSelections() {
   state.termsByBin.external.clear();
   state.termsByBin.internal.clear();
+  state.lastSavedSignature = "";
   $("#readingForm").reset();
   renderBins();
   buildTaxonomy();
@@ -285,7 +328,7 @@ function clearCurrentSelections() {
 
 function hasUnsavedSelections() {
   const draft = collectDraftFields();
-  return Boolean(
+  const hasContent = Boolean(
     draft.externalTerms.length ||
     draft.internalTerms.length ||
     Object.keys(draft.blend).length ||
@@ -295,6 +338,7 @@ function hasUnsavedSelections() {
     draft.subtext ||
     draft.evidence
   );
+  return hasContent && readingFingerprint(draft) !== state.lastSavedSignature;
 }
 
 function confirmImageChange() {
@@ -494,7 +538,11 @@ function setStep(nextStep) {
   $("#backBtn").disabled = state.step === 0;
   $("#readingForm").classList.toggle("is-final", state.step === 5);
   $("#readingForm").classList.toggle("is-saveable", state.step >= 3);
-  window.expressionDebug = { step: state.step, readings: state.readings.length };
+  window.expressionDebug = {
+    step: state.step,
+    readings: state.readings.length,
+    hasUnsavedSelections: hasUnsavedSelections()
+  };
   renderReadings();
   renderDashboard();
   renderModuleChecklist();
@@ -527,7 +575,15 @@ function collectReading() {
 
 function saveReading(event) {
   event.preventDefault();
-  state.readings.unshift(collectReading());
+  const reading = collectReading();
+  const fingerprint = readingFingerprint(reading);
+  const existing = state.readings.find((candidate) => readingFingerprint(candidate) === fingerprint);
+
+  if (!existing) {
+    state.readings.unshift(reading);
+  }
+  state.lastSavedSignature = fingerprint;
+  state.dashboardReadingId = existing?.id || reading.id;
   window.localStorage?.setItem("expressionReadings", JSON.stringify(state.readings));
   renderAssetLibrary();
   setStep(4);
@@ -890,6 +946,7 @@ function selectAsset(asset) {
 function resetAll() {
   window.localStorage?.removeItem("expressionReadings");
   state.readings = [];
+  state.lastSavedSignature = "";
   state.termsByBin.external.clear();
   state.termsByBin.internal.clear();
   $("#readingForm").reset();
@@ -943,6 +1000,7 @@ function collectDraftFields() {
     return [attribute.name, Number(input?.value || 0)];
   }));
   return {
+    imageId: state.currentImage?.id || $("#previewImage")?.dataset.id || "",
     imageName: $("#previewImage")?.dataset.name || "",
     externalTerms: Array.from(state.termsByBin.external),
     internalTerms: Array.from(state.termsByBin.internal),
