@@ -899,6 +899,8 @@ form {
 }
 
 .dashboard-consensus {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   grid-column: 3;
   grid-row: 3 / span 2;
   overflow: hidden;
@@ -1064,7 +1066,11 @@ form {
   font-style: italic;
 }
 
-.dashboard-radar,
+.dashboard-radar {
+  min-height: 0;
+  height: auto;
+}
+
 .consensus {
   min-height: 0;
   height: 100%;
@@ -1072,17 +1078,19 @@ form {
 
 .radar-wrap {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) minmax(90px, 0.7fr);
-  gap: 8px;
-  align-items: center;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
   height: 100%;
   min-height: 0;
 }
 
 .radar-chart {
+  display: block;
   width: 100%;
-  max-height: 100%;
-  min-height: 150px;
+  height: 100%;
+  min-height: 0;
+  overflow: visible;
 }
 
 .radar-grid polygon {
@@ -1098,8 +1106,8 @@ form {
 
 .radar-grid text {
   fill: var(--muted);
-  font-size: 8px;
-  font-weight: 760;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .radar-series polygon {
@@ -1112,25 +1120,28 @@ form {
 
 .radar-legend {
   display: grid;
-  gap: 7px;
+  grid-template-columns: 1fr;
+  gap: 5px;
   min-width: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
 }
 
 .radar-legend span {
   display: grid;
-  grid-template-columns: 9px minmax(0, 1fr);
-  gap: 6px;
-  align-items: start;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
   color: var(--muted);
-  font-size: 0.64rem;
+  font-size: 0.68rem;
   font-weight: 720;
-  line-height: 1.2;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .radar-legend i {
-  width: 9px;
-  height: 9px;
-  margin-top: 1px;
+  width: 10px;
+  height: 10px;
   border-radius: 2px;
 }
 

@@ -800,7 +800,7 @@ function familyEmotionValues(reading) {
   });
 }
 
-function radarPoint(index, value, radius = 78, centerX = 120, centerY = 96) {
+function radarPoint(index, value, radius = 70, centerX = 120, centerY = 105) {
   const angle = -Math.PI / 2 + index * (Math.PI * 2 / emotionFamilies.length);
   const scaledRadius = radius * (value / 100);
   return [
@@ -822,11 +822,11 @@ function radarChart(readings) {
   }));
   const axes = labels.map((label, index) => {
     const [x, y] = radarPoint(index, 100);
-    const [labelX, labelY] = radarPoint(index, 122);
+    const [labelX, labelY] = radarPoint(index, 114);
     const anchor = labelX < 105 ? "end" : labelX > 135 ? "start" : "middle";
     return `
-      <line x1="120" y1="96" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"></line>
-      <text x="${labelX.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="${anchor}">${escapeHtml(label)}</text>
+      <line x1="120" y1="105" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"></line>
+      <text x="${labelX.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle">${escapeHtml(label)}</text>
     `;
   }).join("");
   const shapes = series.map((item) => {
@@ -839,7 +839,7 @@ function radarChart(readings) {
 
   return `
     <div class="radar-wrap">
-      <svg class="radar-chart" viewBox="0 0 240 215" role="img" aria-label="Five emotion family comparison">
+      <svg class="radar-chart" viewBox="0 0 240 200" role="img" aria-label="Five emotion family comparison">
         <g class="radar-grid">
           ${[25, 50, 75, 100].map((level) => `<polygon points="${radarPolygon(labels, level)}"></polygon>`).join("")}
           ${axes}
