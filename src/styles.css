@@ -896,6 +896,10 @@ form {
   grid-column: span 2;
 }
 
+.dashboard-consensus {
+  overflow: hidden;
+}
+
 .dashboard-stats {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -1054,6 +1058,76 @@ form {
   color: var(--muted);
   font-size: 0.78rem;
   font-style: italic;
+}
+
+.dashboard-radar,
+.consensus {
+  min-height: 0;
+  height: 100%;
+}
+
+.radar-wrap {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(90px, 0.7fr);
+  gap: 8px;
+  align-items: center;
+  height: 100%;
+  min-height: 0;
+}
+
+.radar-chart {
+  width: 100%;
+  max-height: 100%;
+  min-height: 150px;
+}
+
+.radar-grid polygon {
+  fill: none;
+  stroke: #d9ddd9;
+  stroke-width: 1;
+}
+
+.radar-grid line {
+  stroke: #d9ddd9;
+  stroke-width: 1;
+}
+
+.radar-grid text {
+  fill: var(--muted);
+  font-size: 8px;
+  font-weight: 760;
+}
+
+.radar-series polygon {
+  fill: var(--radar-color);
+  fill-opacity: 0.16;
+  stroke: var(--radar-color);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.radar-legend {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.radar-legend span {
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr);
+  gap: 6px;
+  align-items: start;
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 720;
+  line-height: 1.2;
+}
+
+.radar-legend i {
+  width: 9px;
+  height: 9px;
+  margin-top: 1px;
+  border-radius: 2px;
 }
 
 .reading-list {

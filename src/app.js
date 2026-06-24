@@ -78,6 +78,18 @@ const emotionFamilies = [
     terms: ["Fearful", "Scared", "Frightened", "Helpless", "Terror", "Panic", "Hysterical", "Insecure", "Inferior", "Inadequate", "Nervous", "Worried", "Anxious", "Horror", "Mortified", "Dread"]
   }
 ];
+const emotionFamilyAliases = {
+  angry: "Anger",
+  disgusted: "Anger",
+  uncomfortable: "Fear",
+  fearful: "Fear",
+  unsure: "Fear",
+  sad: "Sadness",
+  weary: "Sadness",
+  surprised: "Surprise",
+  happy: "Joy"
+};
+const radarColors = ["#246a73", "#bd5d4e", "#7a6fa5", "#c99a2e", "#577a4a", "#9a5573"];
 
 const readingsDatabasePath = "./data/readings.json";
 
@@ -566,18 +578,7 @@ function consensusBars(readings = getImageReadings()) {
   if (readings.length < 2) {
     return `<p class="empty-state">No additional assessment yet.</p>`;
   }
-  const totals = {};
-  readings.forEach((reading) => {
-    Object.entries(reading.blend || {}).forEach(([label, value]) => {
-      totals[label] = (totals[label] || 0) + value;
-    });
-  });
-  return Object.entries(totals)
-    .map(([label, total]) => [label, Math.round(total / readings.length)])
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 7)
-    .map(([label, value]) => miniBar(label, value))
-    .join("") || `<p class="rights-note">No blend data yet.</p>`;
+  return radarChart(readings);
 }
 
 function hasDraftContent(draft) {
@@ -667,16 +668,16 @@ function renderDashboard() {
       <div class="dashboard-chip-list">${dashboardChips(reading.externalTerms)}</div>
     </section>
 
+    <section class="dashboard-card dashboard-internal">
+      <header><h3>Internal</h3><span>${reading.internalTerms.length}</span></header>
+      <div class="dashboard-chip-list">${dashboardChips(reading.internalTerms)}</div>
+    </section>
+
     <section class="dashboard-card dashboard-emotion">
       <header><h3>Emotion</h3><span>blend</span></header>
       <div class="dashboard-bars">
         ${topBlend.length ? topBlend.map(([label, value]) => dashboardBar(label, value)).join("") : `<p class="empty-state">No emotion activation yet.</p>`}
       </div>
-    </section>
-
-    <section class="dashboard-card dashboard-consensus">
-      <header><h3>Consensus</h3><span>${imageReadings.length > 1 ? `${imageReadings.length} assessments averaged` : "this image"}</span></header>
-      <div class="dashboard-bars">${consensusHtml}</div>
     </section>
 
     <section class="dashboard-card dashboard-features">
@@ -686,15 +687,15 @@ function renderDashboard() {
       </div>
     </section>
 
-    <section class="dashboard-card dashboard-internal">
-      <header><h3>Internal</h3><span>${reading.internalTerms.length}</span></header>
-      <div class="dashboard-chip-list">${dashboardChips(reading.internalTerms)}</div>
-    </section>
-
     <section class="dashboard-card dashboard-interpretation">
       <header><h3>Interpretation</h3><span>${escapeHtml(reading.name || "Untitled")}</span></header>
       <p>${escapeHtml(reading.subtext || "No subtext yet.")}</p>
       <p>${escapeHtml(reading.evidence || "No evidence note yet.")}</p>
+    </section>
+
+    <section class="dashboard-card dashboard-consensus">
+      <header><h3>Consensus</h3><span>${imageReadings.length > 1 ? `${imageReadings.length} assessments` : "this image"}</span></header>
+      <div class="dashboard-radar">${consensusHtml}</div>
     </section>
   `;
 
@@ -716,6 +717,80 @@ function dashboardBar(label, value) {
       <span>${escapeHtml(label)}</span>
       <div><i style="width:${Math.max(0, Math.min(100, value))}%"></i></div>
       <b>${value}</b>
+    </div>
+  `;
+}
+
+function emotionFamilyForTerm(term) {
+  const normalized = String(term).trim().toLowerCase();
+  const directFamily = emotionFamilies.find((family) => (
+    family.terms.some((candidate) => candidate.toLowerCase() === normalized)
+  ));
+  return directFamily?.name || emotionFamilyAliases[normalized] || "";
+}
+
+function familyEmotionValues(reading) {
+  const grouped = Object.fromEntries(emotionFamilies.map((family) => [family.name, []]));
+  Object.entries(reading.blend || {}).forEach(([term, rawValue]) => {
+    const family = emotionFamilyForTerm(term);
+    if (family) grouped[family].push(Number(rawValue) || 0);
+  });
+  return emotionFamilies.map((family) => {
+    const values = grouped[family.name];
+    const intensity = values.length
+      ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+      : 0;
+    return [family.name, intensity];
+  });
+}
+
+function radarPoint(index, value, radius = 78, centerX = 120, centerY = 96) {
+  const angle = -Math.PI / 2 + index * (Math.PI * 2 / emotionFamilies.length);
+  const scaledRadius = radius * (value / 100);
+  return [
+    centerX + Math.cos(angle) * scaledRadius,
+    centerY + Math.sin(angle) * scaledRadius
+  ];
+}
+
+function radarPolygon(values, level = 100) {
+  return values.map((_, index) => radarPoint(index, level).map((value) => value.toFixed(1)).join(",")).join(" ");
+}
+
+function radarChart(readings) {
+  const labels = emotionFamilies.map((family) => family.name);
+  const series = readings.map((reading, index) => ({
+    label: reading.name || `Assessment ${index + 1}`,
+    color: radarColors[index % radarColors.length],
+    values: familyEmotionValues(reading).map(([, value]) => value)
+  }));
+  const axes = labels.map((label, index) => {
+    const [x, y] = radarPoint(index, 100);
+    const [labelX, labelY] = radarPoint(index, 122);
+    const anchor = labelX < 105 ? "end" : labelX > 135 ? "start" : "middle";
+    return `
+      <line x1="120" y1="96" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"></line>
+      <text x="${labelX.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="${anchor}">${escapeHtml(label)}</text>
+    `;
+  }).join("");
+  const shapes = series.map((item) => {
+    const points = item.values.map((value, index) => radarPoint(index, value).map((point) => point.toFixed(1)).join(",")).join(" ");
+    return `<polygon points="${points}" style="--radar-color:${item.color}"></polygon>`;
+  }).join("");
+  const legend = series.map((item) => `
+    <span><i style="background:${item.color}"></i>${escapeHtml(item.label)}</span>
+  `).join("");
+
+  return `
+    <div class="radar-wrap">
+      <svg class="radar-chart" viewBox="0 0 240 215" role="img" aria-label="Five emotion family comparison">
+        <g class="radar-grid">
+          ${[25, 50, 75, 100].map((level) => `<polygon points="${radarPolygon(labels, level)}"></polygon>`).join("")}
+          ${axes}
+        </g>
+        <g class="radar-series">${shapes}</g>
+      </svg>
+      <div class="radar-legend">${legend}</div>
     </div>
   `;
 }

@@ -1,6 +1,71 @@
 {
   "readings": [
     {
+      "id": "reference-anna-joy-arriving-through-remembered-pain",
+      "createdAt": "2026-06-24T00:00:00.000Z",
+      "imageId": "anna-complex-joy-can-t-believe-could-it-be-joy-melting-a-pain-witnessing-a-transformation",
+      "imageName": "Anna complex joy can't believe could it be joy melting a pain witnessing a transformation",
+      "source": "Reference assessment",
+      "name": "joy arriving through remembered pain",
+      "subtext": "Could this really be happening? I want to encourage what I am seeing, but the relief is touching the place where the old hurt still lives.",
+      "evidence": "The mouth forms a small, socially available smile while the raised inner brows keep the expression from becoming uncomplicated happiness. Her eyes are wide, soft, and searching, carrying surprise and vulnerability alongside warmth. The cheeks lift gently, but the jaw and mouth remain slightly held, suggesting that hope is arriving before the body has fully released its protective tension.",
+      "externalTerms": [
+        "Social Display: Objective: to encourage",
+        "Social Display: Objective: to reassure",
+        "Social Display: Relational stance: receptive",
+        "Social Display: Audience orientation: offering warmth",
+        "Social Display: Masking and leakage: gentle composure",
+        "Appraisal: Time direction: present recognition",
+        "Appraisal: Goal relation: possibility opening",
+        "State and Bearing: Composure: tender poise",
+        "Affect: Felt body state: softening",
+        "Write-in: hopeful connection"
+      ],
+      "internalTerms": [
+        "Emotions: Joy: moved",
+        "Emotions: Joy: delighted",
+        "Emotions: Sadness: hurt",
+        "Emotions: Sadness: sorrow",
+        "Emotions: Surprise: astonished",
+        "Emotions: Surprise: dismayed",
+        "Emotions: Fear: vulnerable",
+        "Appraisal: Coping and certainty: cautiously hopeful",
+        "Appraisal: Novelty: can this be real",
+        "State and Bearing: Transition: thawing",
+        "Write-in: grief softening",
+        "Write-in: relief touching an old wound"
+      ],
+      "signals": {
+        "Brows": 76,
+        "Eyes": 72,
+        "Gaze": 58,
+        "Mouth": 62,
+        "Jaw": 38,
+        "Cheeks and nose": 48,
+        "Head and posture": 44
+      },
+      "signalDescriptors": {
+        "Brows": ["raised inner brows", "softened", "asymmetrical", "lifted in worry"],
+        "Eyes": ["wide", "searching", "soft", "pleading", "alert"],
+        "Gaze": ["sideward", "approaching", "exposed", "seeking safety"],
+        "Mouth": ["soft smile", "half smile", "held smile", "parted"],
+        "Jaw": ["released", "held back", "restrained"],
+        "Cheeks and nose": ["lifted cheeks", "softened cheeks", "warmed", "tearful fullness"],
+        "Head and posture": ["held still", "offering", "open posture", "unsteady"]
+      },
+      "blend": {
+        "Delighted": 72,
+        "Moved": 68,
+        "Sad": 54,
+        "Hurt": 48,
+        "Astonished": 52,
+        "Dismayed": 38,
+        "Worried": 28,
+        "Frightened": 12,
+        "Angry": 2
+      }
+    },
+    {
       "id": "reference-belle-defeated-compassionate-shock",
       "createdAt": "2026-06-19T00:00:00.000Z",
       "imageId": "belle-defeated-astonished-reflective-empathetic-horrified-compassionate",
