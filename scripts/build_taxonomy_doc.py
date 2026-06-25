@@ -280,6 +280,7 @@ def build_document(data):
     vocab_count = sum(total_terms(category["groups"]) for category in data["taxonomy"])
     feature_count = sum(len(feature["terms"]) for feature in data["featuresActivated"])
     emotion_count = sum(len(family["terms"]) for family in data["emotionFamilies"])
+    event_count = sum(len(dimension["terms"]) for dimension in data["whatJustHappenedDimensions"])
     unique_terms = set()
     for category in data["taxonomy"]:
         for group in category["groups"]:
@@ -288,13 +289,16 @@ def build_document(data):
         unique_terms.update(term.lower() for term in feature["terms"])
     for family in data["emotionFamilies"]:
         unique_terms.update(term.lower() for term in family["terms"])
+    for dimension in data["whatJustHappenedDimensions"]:
+        unique_terms.update(term.lower() for term in dimension["terms"])
 
-    summary = doc.add_table(rows=2, cols=4)
+    summary = doc.add_table(rows=2, cols=5)
     summary.style = "Table Grid"
     summary_values = [
         ("Vocabulary tags", str(vocab_count)),
         ("Feature descriptors", str(feature_count)),
         ("Emotion options", str(emotion_count)),
+        ("Event options", str(event_count)),
         ("Unique terms", str(len(unique_terms))),
     ]
     for index, (label, value) in enumerate(summary_values):
@@ -312,7 +316,7 @@ def build_document(data):
         bottom_p.paragraph_format.space_after = Pt(0)
         run = bottom_p.add_run(value)
         set_font(run, size=16, color=BLUE, bold=True)
-    set_table_geometry(summary, [2340, 2340, 2340, 2340])
+    set_table_geometry(summary, [1872, 1872, 1872, 1872, 1872])
     set_repeat_table_header(summary.rows[0])
     prevent_row_split(summary.rows[1])
 
@@ -357,7 +361,22 @@ def build_document(data):
     )
     add_term_table(doc, aliases, "Saved label", widths=(2200, 6620, 540))
 
-    add_section_heading(doc, "3. Vocabulary Assignment Taxonomy", 1)
+    add_section_heading(doc, "3. What Just Happened", 1)
+    paragraph = doc.add_paragraph(
+        "Each dimension uses a selectable interpretation label and a 0 to 100 intensity slider to code the inferred change process."
+    )
+    paragraph.paragraph_format.space_after = Pt(8)
+    event_rows = []
+    for dimension in data["whatJustHappenedDimensions"]:
+        event_rows.append(
+            (
+                f'{dimension["name"]} (default: {dimension["defaultTerm"]})',
+                dimension["terms"],
+            )
+        )
+    add_term_table(doc, event_rows, "Dimension")
+
+    add_section_heading(doc, "4. Vocabulary Assignment Taxonomy", 1)
     doc.add_paragraph(
         "Every tag in this section can be assigned to either the External or Internal bin. Repeated words are retained where they carry different meanings in different branches."
     )
@@ -375,18 +394,18 @@ def build_document(data):
             "Subgroup",
         )
 
-    add_section_heading(doc, "4. Assignment Bins and Interpretation Fields", 1)
+    add_section_heading(doc, "5. Assignment Bins and Interpretation Fields", 1)
     add_section_heading(doc, "Message bins", 2)
     add_field_table(doc, data["assignmentBins"])
     doc.add_paragraph()
     add_section_heading(doc, "Interpretation fields", 2)
     add_field_table(doc, data["interpretationFields"])
 
-    add_section_heading(doc, "5. Workflow Modules", 1)
+    add_section_heading(doc, "6. Workflow Modules", 1)
     module_rows = [(module["label"], [module["id"]]) for module in data["workflowModules"]]
     add_term_table(doc, module_rows, "Displayed label", widths=(2600, 6220, 540))
 
-    add_section_heading(doc, "6. Literature Backbone Notes", 1)
+    add_section_heading(doc, "7. Literature Backbone Notes", 1)
     for note in data["literatureNotes"]:
         paragraph = doc.add_paragraph(style="List Bullet")
         paragraph.paragraph_format.left_indent = Inches(0.375)

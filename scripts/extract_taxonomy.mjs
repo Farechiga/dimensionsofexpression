@@ -47,6 +47,7 @@ const output = {
   literatureNotes,
   featuresActivated: extractConst("signalAttributes"),
   emotionFamilies: extractConst("emotionFamilies"),
+  whatJustHappenedDimensions: extractConst("whatJustHappenedDimensions"),
   emotionFamilyAliases: extractConst("emotionFamilyAliases"),
   workflowModules: extractConst("modules").map(({ id, label }) => ({ id, label })),
   interpretationFields: [

@@ -767,6 +767,61 @@ form {
   font-weight: 740;
 }
 
+.emotion-section-title {
+  margin: 2px 0 9px;
+  font-size: 1rem;
+}
+
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.event-chip {
+  display: grid;
+  grid-template-columns: 112px minmax(160px, 1fr) minmax(64px, 0.55fr);
+  gap: 9px;
+  align-items: center;
+  min-height: 50px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fcfcfa;
+}
+
+.event-chip label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 760;
+}
+
+.event-chip label span:first-child {
+  color: var(--ink);
+}
+
+.event-term-select {
+  width: 100%;
+  min-width: 0;
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 0 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 740;
+}
+
+.event-chip input[type="range"] {
+  width: 100%;
+  accent-color: var(--lavender);
+}
+
 .field {
   display: grid;
   gap: 7px;
@@ -904,6 +959,43 @@ form {
   grid-column: 3;
   grid-row: 3 / span 2;
   overflow: hidden;
+}
+
+.dashboard-event-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+}
+
+.dashboard-event-summary > strong {
+  flex: 0 0 100%;
+  color: var(--teal);
+  font-size: 0.68rem;
+}
+
+.dashboard-event-summary > span {
+  display: inline-flex;
+  gap: 4px;
+  align-items: baseline;
+  border: 1px solid #c6d8d4;
+  border-radius: 6px;
+  padding: 2px 5px;
+  background: #eef5f2;
+  color: var(--teal);
+  font-size: 0.62rem;
+}
+
+.dashboard-event-summary b {
+  color: var(--ink);
+}
+
+.dashboard-event-summary em {
+  color: var(--muted);
+  font-style: normal;
+  font-weight: 800;
 }
 
 .dashboard-stats {
@@ -1583,6 +1675,10 @@ form {
   scrollbar-width: thin;
 }
 
+.event-grid {
+  align-content: start;
+}
+
 .field textarea {
   min-height: 90px;
   max-height: 120px;
@@ -1720,7 +1816,8 @@ form {
 
   .compact-stack,
   .taxonomy-groups,
-  .blend-grid {
+  .blend-grid,
+  .event-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1807,6 +1904,11 @@ form {
   .blend-chip {
     grid-template-columns: 62px minmax(90px, 0.55fr) minmax(90px, 1fr);
     padding: 6px 7px;
+  }
+
+  .event-chip {
+    grid-template-columns: 96px minmax(90px, 0.7fr) minmax(80px, 1fr);
+    padding: 5px 7px;
   }
 
   .descriptor-list {

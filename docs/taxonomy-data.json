@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-25T01:53:48.493Z",
+  "generatedAt": "2026-06-25T02:55:15.967Z",
   "taxonomy": [
     {
       "id": "emotion-wheel",
@@ -777,6 +777,120 @@
         "Horror",
         "Mortified",
         "Dread"
+      ]
+    }
+  ],
+  "whatJustHappenedDimensions": [
+    {
+      "name": "What changed?",
+      "defaultTerm": "new possibility opened",
+      "terms": [
+        "new possibility opened",
+        "belief overturned",
+        "hidden information surfaced",
+        "choice narrowed",
+        "choice expanded",
+        "identity or status shifted",
+        "expectation failed",
+        "threat appeared",
+        "harm witnessed",
+        "internalizing loss",
+        "betrayal or boundary violation",
+        "connection strengthened"
+      ]
+    },
+    {
+      "name": "Emotional leakage",
+      "defaultTerm": "mixed signal",
+      "terms": [
+        "fully masked",
+        "controlled surface",
+        "faint leakage",
+        "mixed signal",
+        "visible strain",
+        "emotion breaking through",
+        "involuntary flash",
+        "delayed reaction",
+        "overcorrection",
+        "openly expressed",
+        "emotion flooding",
+        "mask collapsing"
+      ]
+    },
+    {
+      "name": "Certainty",
+      "defaultTerm": "undecided",
+      "terms": [
+        "undecided",
+        "wondering",
+        "doubtful",
+        "suspicious",
+        "wavering",
+        "conflicted",
+        "testing",
+        "cautiously considering",
+        "reluctantly convinced",
+        "settling",
+        "dawning realization",
+        "certain",
+        "adamant",
+        "entrenched",
+        "bullheaded"
+      ]
+    },
+    {
+      "name": "Engagement",
+      "defaultTerm": "observing",
+      "terms": [
+        "disengaged",
+        "checked out",
+        "withdrawn",
+        "distant",
+        "observing",
+        "monitoring",
+        "cautiously attentive",
+        "considering",
+        "curious",
+        "attentive",
+        "absorbed",
+        "compelled",
+        "fully engaged"
+      ]
+    },
+    {
+      "name": "Openness",
+      "defaultTerm": "cautious",
+      "terms": [
+        "sealed off",
+        "guarded",
+        "cautious",
+        "withholding",
+        "reserved",
+        "ambivalent",
+        "tentative",
+        "receptive",
+        "softening",
+        "vulnerable",
+        "inviting"
+      ]
+    },
+    {
+      "name": "Social orientation",
+      "defaultTerm": "monitoring others",
+      "terms": [
+        "self-protective",
+        "inward-focused",
+        "private processing",
+        "guarded contact",
+        "monitoring others",
+        "seeking safety",
+        "testing connection",
+        "seeking approval",
+        "receptive",
+        "affiliative",
+        "offering support",
+        "other-directed",
+        "group-oriented"
       ]
     }
   ],

@@ -14,7 +14,11 @@ const orderedTaxonomy = taxonomyOrder
 const modules = [
   { id: "image", label: "Image", isComplete: (draft) => Boolean(draft.imageName) },
   { id: "vocabulary", label: "Vocabulary", isComplete: (draft) => draft.externalTerms?.length > 0 || draft.internalTerms?.length > 0 },
-  { id: "emotion", label: "Emotion", isComplete: (draft) => Object.keys(draft.blend || {}).length > 0 },
+  {
+    id: "emotion",
+    label: "Emotion",
+    isComplete: (draft) => Object.keys(draft.blend || {}).length > 0 || Object.keys(draft.whatJustHappened || {}).length > 0
+  },
   { id: "signals", label: "Features Activated", isComplete: (draft) => hasNonDefault(draft.signals, 0) || Object.keys(draft.signalDescriptors || {}).length > 0 },
   { id: "interpret", label: "Interpret", isComplete: (draft) => Boolean(draft.name && draft.name !== "Untitled reading" && draft.subtext && draft.evidence) },
   { id: "compare", label: "Compare", isComplete: (draft) => draft.savedReadings > 0 }
@@ -78,6 +82,120 @@ const emotionFamilies = [
     terms: ["Fearful", "Scared", "Frightened", "Helpless", "Terror", "Panic", "Hysterical", "Insecure", "Inferior", "Inadequate", "Nervous", "Worried", "Anxious", "Horror", "Mortified", "Dread"]
   }
 ];
+const whatJustHappenedDimensions = [
+  {
+    name: "What changed?",
+    defaultTerm: "new possibility opened",
+    terms: [
+      "new possibility opened",
+      "belief overturned",
+      "hidden information surfaced",
+      "choice narrowed",
+      "choice expanded",
+      "identity or status shifted",
+      "expectation failed",
+      "threat appeared",
+      "harm witnessed",
+      "internalizing loss",
+      "betrayal or boundary violation",
+      "connection strengthened"
+    ]
+  },
+  {
+    name: "Emotional leakage",
+    defaultTerm: "mixed signal",
+    terms: [
+      "fully masked",
+      "controlled surface",
+      "faint leakage",
+      "mixed signal",
+      "visible strain",
+      "emotion breaking through",
+      "involuntary flash",
+      "delayed reaction",
+      "overcorrection",
+      "openly expressed",
+      "emotion flooding",
+      "mask collapsing"
+    ]
+  },
+  {
+    name: "Certainty",
+    defaultTerm: "undecided",
+    terms: [
+      "undecided",
+      "wondering",
+      "doubtful",
+      "suspicious",
+      "wavering",
+      "conflicted",
+      "testing",
+      "cautiously considering",
+      "reluctantly convinced",
+      "settling",
+      "dawning realization",
+      "certain",
+      "adamant",
+      "entrenched",
+      "bullheaded"
+    ]
+  },
+  {
+    name: "Engagement",
+    defaultTerm: "observing",
+    terms: [
+      "disengaged",
+      "checked out",
+      "withdrawn",
+      "distant",
+      "observing",
+      "monitoring",
+      "cautiously attentive",
+      "considering",
+      "curious",
+      "attentive",
+      "absorbed",
+      "compelled",
+      "fully engaged"
+    ]
+  },
+  {
+    name: "Openness",
+    defaultTerm: "cautious",
+    terms: [
+      "sealed off",
+      "guarded",
+      "cautious",
+      "withholding",
+      "reserved",
+      "ambivalent",
+      "tentative",
+      "receptive",
+      "softening",
+      "vulnerable",
+      "inviting"
+    ]
+  },
+  {
+    name: "Social orientation",
+    defaultTerm: "monitoring others",
+    terms: [
+      "self-protective",
+      "inward-focused",
+      "private processing",
+      "guarded contact",
+      "monitoring others",
+      "seeking safety",
+      "testing connection",
+      "seeking approval",
+      "receptive",
+      "affiliative",
+      "offering support",
+      "other-directed",
+      "group-oriented"
+    ]
+  }
+];
 const emotionFamilyAliases = {
   angry: "Anger",
   disgusted: "Anger",
@@ -111,6 +229,10 @@ function readingFingerprint(reading = {}) {
     externalTerms: [...(reading.externalTerms || [])].sort(),
     internalTerms: [...(reading.internalTerms || [])].sort(),
     blend: sortedEntries(reading.blend, (value) => Number(value) || 0),
+    whatJustHappened: sortedEntries(reading.whatJustHappened, (value) => ({
+      term: value?.term || "",
+      intensity: Number(value?.intensity) || 0
+    })),
     signals: sortedEntries(reading.signals, (value) => Number(value) || 0),
     signalDescriptors: sortedEntries(
       reading.signalDescriptors,
@@ -332,6 +454,7 @@ function hasUnsavedSelections() {
     draft.externalTerms.length ||
     draft.internalTerms.length ||
     Object.keys(draft.blend).length ||
+    Object.keys(draft.whatJustHappened).length ||
     hasNonDefault(draft.signals, 0) ||
     Object.keys(draft.signalDescriptors).length ||
     draft.name ||
@@ -449,6 +572,23 @@ function buildSliders() {
       `;
     })
   )).join("");
+  $("#whatJustHappened").innerHTML = whatJustHappenedDimensions.map((dimension, index) => {
+    const id = `event-dimension-${index}`;
+    return `
+      <div class="event-chip">
+        <label for="${id}">
+          <span>${escapeHtml(dimension.name)}</span>
+          <span data-output="${id}">0</span>
+        </label>
+        <select class="event-term-select" aria-label="${escapeHtml(dimension.name)}">
+          ${dimension.terms.map((term) => `
+            <option value="${escapeHtml(term)}"${term === dimension.defaultTerm ? " selected" : ""}>${escapeHtml(term)}</option>
+          `).join("")}
+        </select>
+        <input id="${id}" name="${id}" type="range" min="0" max="100" value="0" data-slider>
+      </div>
+    `;
+  }).join("");
 }
 
 function buildTaxonomy() {
@@ -519,6 +659,9 @@ function bindSliders() {
   $$(".emotion-term-select").forEach((select) => {
     select.addEventListener("change", renderModuleChecklist);
   });
+  $$(".event-term-select").forEach((select) => {
+    select.addEventListener("change", renderModuleChecklist);
+  });
 }
 
 function collectEmotionBlend() {
@@ -529,6 +672,19 @@ function collectEmotionBlend() {
     if (label && value > 0) blend[label] = Math.max(blend[label] || 0, value);
   });
   return blend;
+}
+
+function collectWhatJustHappened() {
+  const dimensions = {};
+  $$(".event-chip").forEach((chip) => {
+    const name = chip.querySelector("label span")?.textContent?.trim();
+    const term = chip.querySelector(".event-term-select")?.value;
+    const intensity = Number(chip.querySelector("input[type='range']")?.value || 0);
+    if (name && term && intensity > 0) {
+      dimensions[name] = { term, intensity };
+    }
+  });
+  return dimensions;
 }
 
 function setStep(nextStep) {
@@ -555,6 +711,7 @@ function collectReading() {
   }));
   const signalDescriptors = collectSignalDescriptors();
   const blend = collectEmotionBlend();
+  const whatJustHappened = collectWhatJustHappened();
 
   return {
     id: crypto.randomUUID(),
@@ -569,7 +726,8 @@ function collectReading() {
     taxonomyTerms: [...state.termsByBin.external, ...state.termsByBin.internal],
     signals: signalValues,
     signalDescriptors,
-    blend
+    blend,
+    whatJustHappened
   };
 }
 
@@ -642,6 +800,7 @@ function hasDraftContent(draft) {
     draft.externalTerms.length ||
     draft.internalTerms.length ||
     Object.keys(draft.blend || {}).length ||
+    Object.keys(draft.whatJustHappened || {}).length ||
     hasNonDefault(draft.signals, 0) ||
     Object.keys(draft.signalDescriptors || {}).length ||
     draft.name ||
@@ -700,6 +859,8 @@ function renderDashboard() {
   const topBlend = Object.entries(reading.blend || {})
     .map(([emotion, value]) => [emotion, Number(value || 0)])
     .sort((a, b) => b[1] - a[1]);
+  const eventRows = Object.entries(reading.whatJustHappened || {})
+    .sort(([, left], [, right]) => Number(right.intensity || 0) - Number(left.intensity || 0));
   const featureRows = signalAttributes.map((attribute) => ({
     name: attribute.name,
     value: Number(reading.signals?.[attribute.name] || 0),
@@ -747,6 +908,14 @@ function renderDashboard() {
       <header><h3>Interpretation</h3><span>${escapeHtml(reading.name || "Untitled")}</span></header>
       <p>${escapeHtml(reading.subtext || "No subtext yet.")}</p>
       <p>${escapeHtml(reading.evidence || "No evidence note yet.")}</p>
+      ${eventRows.length ? `
+        <div class="dashboard-event-summary">
+          <strong>What just happened</strong>
+          ${eventRows.map(([name, value]) => `
+            <span><b>${escapeHtml(name)}</b>${escapeHtml(value.term)} <em>${Number(value.intensity) || 0}</em></span>
+          `).join("")}
+        </div>
+      ` : ""}
     </section>
 
     <section class="dashboard-card dashboard-consensus">
@@ -961,6 +1130,7 @@ function emptyDraft() {
     externalTerms: [],
     internalTerms: [],
     blend: {},
+    whatJustHappened: {},
     signals: {},
     signalDescriptors: {},
     name: "",
@@ -982,6 +1152,7 @@ function normalizeSavedReading(reading) {
     signals: reading.signals || {},
     signalDescriptors: reading.signalDescriptors || {},
     blend: reading.blend || {},
+    whatJustHappened: reading.whatJustHappened || {},
     savedReadings: 1
   };
 }
@@ -995,6 +1166,7 @@ function currentDraft() {
 
 function collectDraftFields() {
   const blend = collectEmotionBlend();
+  const whatJustHappened = collectWhatJustHappened();
   const signals = Object.fromEntries(signalAttributes.map((attribute) => {
     const input = $(`#${slug(attribute.name)}`);
     return [attribute.name, Number(input?.value || 0)];
@@ -1005,6 +1177,7 @@ function collectDraftFields() {
     externalTerms: Array.from(state.termsByBin.external),
     internalTerms: Array.from(state.termsByBin.internal),
     blend,
+    whatJustHappened,
     signals,
     signalDescriptors: collectSignalDescriptors(),
     name: $("#expressionName")?.value.trim() || "",
