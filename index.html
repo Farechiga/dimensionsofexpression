@@ -4,13 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=0.9.0">
+    <link rel="stylesheet" href="./src/styles.css?v=1.0.0">
   </head>
   <body>
     <main class="app-shell">
       <section class="workspace">
         <header class="topbar">
           <h1>Dimensions of Expression</h1>
+          <div class="taxonomy-search" aria-label="Taxonomy search">
+            <div class="taxonomy-search-combobox">
+              <input
+                id="taxonomySearch"
+                type="search"
+                placeholder="Search tags"
+                autocomplete="off"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-controls="taxonomySearchResults"
+                aria-expanded="false"
+              >
+              <div id="taxonomySearchResults" class="taxonomy-search-results" role="listbox"></div>
+            </div>
+            <div id="taxonomySearchAction" class="taxonomy-search-action" aria-live="polite">
+              <span class="taxonomy-search-hint">Choose a tag to code it</span>
+            </div>
+          </div>
         </header>
 
         <section class="studio-grid">
@@ -137,6 +155,6 @@
         </section>
       </section>
     </main>
-    <script src="./src/app.js?v=0.9.0" type="module"></script>
+    <script src="./src/app.js?v=1.0.0" type="module"></script>
   </body>
 </html>

@@ -284,7 +284,11 @@ const state = {
   generatedImages: [],
   characterFilter: "all",
   dashboardReadingId: "",
-  lastSavedSignature: ""
+  lastSavedSignature: "",
+  searchSelection: null,
+  searchDestination: "",
+  searchResults: [],
+  searchActiveIndex: -1
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -296,6 +300,59 @@ const categoryLabels = {
   "social-display": "Social",
   "state-bearing": "State"
 };
+
+function buildSearchIndex() {
+  const items = [];
+  taxonomy.forEach((category) => {
+    category.groups.forEach((group) => {
+      group.terms.forEach((term) => {
+        items.push({
+          id: `vocabulary-${slug(category.id)}-${slug(group.label)}-${slug(term)}`,
+          type: "vocabulary",
+          term,
+          context: `${categoryLabels[category.id] || category.title} / ${group.label}`,
+          fullTerm: `${category.title}: ${group.label}: ${term}`
+        });
+      });
+    });
+  });
+  signalAttributes.forEach((feature) => {
+    feature.terms.forEach((term) => {
+      items.push({
+        id: `feature-${slug(feature.name)}-${slug(term)}`,
+        type: "feature",
+        term,
+        context: `Features Activated / ${feature.name}`,
+        featureName: feature.name
+      });
+    });
+  });
+  emotionFamilies.forEach((family) => {
+    family.terms.forEach((term) => {
+      items.push({
+        id: `emotion-${slug(family.name)}-${slug(term)}`,
+        type: "emotion",
+        term,
+        context: `Emotion / ${family.name}`,
+        familyName: family.name
+      });
+    });
+  });
+  whatJustHappenedDimensions.forEach((dimension) => {
+    dimension.terms.forEach((term) => {
+      items.push({
+        id: `event-${slug(dimension.name)}-${slug(term)}`,
+        type: "event",
+        term,
+        context: `What just happened / ${dimension.name}`,
+        dimensionName: dimension.name
+      });
+    });
+  });
+  return items;
+}
+
+const taxonomySearchIndex = buildSearchIndex();
 
 function hasNonDefault(values = {}, defaultValue) {
   return Object.values(values).some((value) => Number(value) !== defaultValue);
@@ -1212,6 +1269,227 @@ function addTermToBin(term, bin) {
   renderModuleChecklist();
 }
 
+function taxonomySearchMatches(query) {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+  return taxonomySearchIndex
+    .map((item) => {
+      const term = item.term.toLowerCase();
+      const context = item.context.toLowerCase();
+      const termIndex = term.indexOf(needle);
+      const contextIndex = context.indexOf(needle);
+      if (termIndex < 0 && contextIndex < 0) return null;
+      const wordStart = term.split(/\s+/).some((word) => word.startsWith(needle));
+      return {
+        item,
+        rank: term === needle ? 0 : term.startsWith(needle) ? 1 : wordStart ? 2 : termIndex >= 0 ? 3 : 4,
+        position: termIndex >= 0 ? termIndex : contextIndex
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.rank - b.rank || a.position - b.position || a.item.term.length - b.item.term.length)
+    .slice(0, 10)
+    .map(({ item }) => item);
+}
+
+function setSearchResultsOpen(isOpen) {
+  $("#taxonomySearch").setAttribute("aria-expanded", String(isOpen));
+  $("#taxonomySearchResults").classList.toggle("is-open", isOpen);
+}
+
+function renderTaxonomySearchResults(query) {
+  const results = taxonomySearchMatches(query);
+  state.searchResults = results;
+  state.searchActiveIndex = results.length ? 0 : -1;
+  const target = $("#taxonomySearchResults");
+  target.innerHTML = results.map((item, index) => `
+    <button
+      type="button"
+      role="option"
+      class="taxonomy-search-result${index === state.searchActiveIndex ? " is-active" : ""}"
+      data-search-id="${escapeHtml(item.id)}"
+      aria-selected="${index === state.searchActiveIndex}"
+    >
+      <strong>${escapeHtml(item.term)}</strong>
+      <span>${escapeHtml(item.context)}</span>
+    </button>
+  `).join("");
+  setSearchResultsOpen(Boolean(query.trim() && results.length));
+}
+
+function updateSearchResultFocus() {
+  $$(".taxonomy-search-result").forEach((result, index) => {
+    const isActive = index === state.searchActiveIndex;
+    result.classList.toggle("is-active", isActive);
+    result.setAttribute("aria-selected", String(isActive));
+  });
+}
+
+function selectTaxonomySearchItem(item) {
+  if (!item) return;
+  state.searchSelection = item;
+  state.searchDestination = "";
+  $("#taxonomySearch").value = item.term;
+  setSearchResultsOpen(false);
+  renderTaxonomySearchAction();
+}
+
+function renderTaxonomySearchAction(message = "") {
+  const target = $("#taxonomySearchAction");
+  const item = state.searchSelection;
+  if (!item) {
+    target.innerHTML = `<span class="taxonomy-search-hint">${escapeHtml(message || "Choose a tag to code it")}</span>`;
+    return;
+  }
+  if (item.type === "vocabulary") {
+    target.innerHTML = `
+      <span class="taxonomy-search-context">${escapeHtml(item.context)}</span>
+      <div class="search-destination" role="group" aria-label="Required expression destination">
+        <button type="button" data-search-destination="external" aria-pressed="${state.searchDestination === "external"}">External</button>
+        <button type="button" data-search-destination="internal" aria-pressed="${state.searchDestination === "internal"}">Internal</button>
+      </div>
+      <button class="search-add-button" type="button" data-search-add${state.searchDestination ? "" : " disabled"}>Add</button>
+    `;
+    return;
+  }
+  target.innerHTML = `
+    <span class="taxonomy-search-context">${escapeHtml(item.context)}</span>
+    <label class="search-intensity" for="taxonomySearchIntensity">
+      <span>Intensity</span>
+      <input id="taxonomySearchIntensity" type="range" min="1" max="100" value="50">
+      <output for="taxonomySearchIntensity">50</output>
+    </label>
+    <button class="search-add-button" type="button" data-search-add>Add</button>
+  `;
+}
+
+function clearTaxonomySearch(message = "") {
+  state.searchSelection = null;
+  state.searchDestination = "";
+  state.searchResults = [];
+  state.searchActiveIndex = -1;
+  $("#taxonomySearch").value = "";
+  $("#taxonomySearchResults").innerHTML = "";
+  setSearchResultsOpen(false);
+  renderTaxonomySearchAction(message);
+}
+
+function setControlIntensity(input, intensity) {
+  if (!input) return;
+  input.value = String(intensity);
+  const output = document.querySelector(`[data-output="${input.id}"]`);
+  if (output) output.textContent = String(intensity);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function applyFeatureSearchItem(item, intensity) {
+  const value = `${item.featureName}: ${item.term}`;
+  const checkbox = $$("input[name='signalDescriptor']").find((input) => input.value === value);
+  if (checkbox) {
+    checkbox.checked = true;
+    checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  setControlIntensity($(`#${slug(item.featureName)}`), intensity);
+  setStep(2);
+}
+
+function applyEmotionSearchItem(item, intensity) {
+  const familyChips = $$(".blend-chip").filter((chip) => chip.dataset.emotionFamily === item.familyName);
+  const matchingChips = familyChips.filter((chip) => (
+    Array.from(chip.querySelector(".emotion-term-select")?.options || []).some((option) => option.value === item.term)
+  ));
+  const chip = matchingChips.find((candidate) => Number(candidate.querySelector("input[type='range']")?.value || 0) === 0)
+    || matchingChips[0];
+  if (!chip) return;
+  const select = chip.querySelector(".emotion-term-select");
+  select.value = item.term;
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+  setControlIntensity(chip.querySelector("input[type='range']"), intensity);
+  setStep(1);
+}
+
+function applyEventSearchItem(item, intensity) {
+  const dimensionIndex = whatJustHappenedDimensions.findIndex((dimension) => dimension.name === item.dimensionName);
+  const chip = $$(".event-chip")[dimensionIndex];
+  if (!chip) return;
+  const select = chip.querySelector(".event-term-select");
+  select.value = item.term;
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+  setControlIntensity(chip.querySelector("input[type='range']"), intensity);
+  setStep(1);
+}
+
+function applyTaxonomySearchSelection() {
+  const item = state.searchSelection;
+  if (!item) return;
+  if (item.type === "vocabulary") {
+    if (!state.searchDestination) return;
+    const destination = state.searchDestination;
+    addTermToBin(item.fullTerm, destination);
+    setStep(0);
+    clearTaxonomySearch(`Added ${item.term} to ${destination}`);
+    return;
+  }
+  const intensity = Number($("#taxonomySearchIntensity")?.value || 50);
+  if (item.type === "feature") applyFeatureSearchItem(item, intensity);
+  if (item.type === "emotion") applyEmotionSearchItem(item, intensity);
+  if (item.type === "event") applyEventSearchItem(item, intensity);
+  clearTaxonomySearch(`Added ${item.term} at ${intensity}`);
+}
+
+function bindTaxonomySearch() {
+  const input = $("#taxonomySearch");
+  const results = $("#taxonomySearchResults");
+  const action = $("#taxonomySearchAction");
+  input.addEventListener("input", () => {
+    state.searchSelection = null;
+    state.searchDestination = "";
+    renderTaxonomySearchAction();
+    renderTaxonomySearchResults(input.value);
+  });
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" && state.searchResults.length) {
+      event.preventDefault();
+      state.searchActiveIndex = (state.searchActiveIndex + 1) % state.searchResults.length;
+      updateSearchResultFocus();
+    } else if (event.key === "ArrowUp" && state.searchResults.length) {
+      event.preventDefault();
+      state.searchActiveIndex = (state.searchActiveIndex - 1 + state.searchResults.length) % state.searchResults.length;
+      updateSearchResultFocus();
+    } else if (event.key === "Enter" && state.searchActiveIndex >= 0) {
+      event.preventDefault();
+      selectTaxonomySearchItem(state.searchResults[state.searchActiveIndex]);
+    } else if (event.key === "Escape") {
+      setSearchResultsOpen(false);
+    }
+  });
+  input.addEventListener("search", () => {
+    if (!input.value) clearTaxonomySearch();
+  });
+  results.addEventListener("click", (event) => {
+    const result = event.target.closest("[data-search-id]");
+    if (!result) return;
+    selectTaxonomySearchItem(taxonomySearchIndex.find((item) => item.id === result.dataset.searchId));
+  });
+  action.addEventListener("click", (event) => {
+    const destination = event.target.closest("[data-search-destination]")?.dataset.searchDestination;
+    if (destination) {
+      state.searchDestination = destination;
+      renderTaxonomySearchAction();
+      return;
+    }
+    if (event.target.closest("[data-search-add]")) applyTaxonomySearchSelection();
+  });
+  action.addEventListener("input", (event) => {
+    if (event.target.id === "taxonomySearchIntensity") {
+      action.querySelector("output").textContent = event.target.value;
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".taxonomy-search-combobox")) setSearchResultsOpen(false);
+  });
+}
+
 function openWriteIn(bin) {
   if (!state.termsByBin[bin]) return;
   state.writeInBin = bin;
@@ -1316,6 +1594,7 @@ buildSliders();
 buildTaxonomy();
 bindSliders();
 bindBins();
+bindTaxonomySearch();
 initializeImages();
 
 $$(".step").forEach((button) => button.addEventListener("click", () => setStep(Number(button.dataset.step))));
