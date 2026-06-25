@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=1.0.3";
+import { taxonomy } from "./taxonomy.js?v=1.1.1";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -62,7 +62,7 @@ const emotionFamilies = [
   {
     name: "Sadness",
     defaults: ["Sad", "Depressed"],
-    terms: ["Sad", "Suffering", "Agony", "Hurt", "Depressed", "Sorrow", "Disappointed", "Dismayed", "Displeased", "Shameful", "Regretful", "Guilty", "Neglected", "Isolated", "Lonely", "Despair", "Grief", "Powerless"]
+    terms: ["Sad", "Suffering", "Agony", "Hurt", "Depressed", "Sorrow", "Disappointed", "Dismayed", "Displeased", "Shameful", "Regretful", "Guilty", "Neglected", "Isolated", "Lonely", "Despair", "Grief", "Powerless", "Wistful", "Yearning", "Forlorn"]
   },
   {
     name: "Surprise",

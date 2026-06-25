@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-25T14:40:09.781Z",
+  "generatedAt": "2026-06-25T15:39:36.982Z",
   "taxonomy": [
     {
       "id": "emotion-wheel",
@@ -58,7 +58,10 @@
             "inferior",
             "hurt",
             "disappointed",
-            "embarrassed"
+            "embarrassed",
+            "wistful",
+            "yearning",
+            "forlorn"
           ]
         },
         {
@@ -833,7 +836,10 @@
         "Lonely",
         "Despair",
         "Grief",
-        "Powerless"
+        "Powerless",
+        "Wistful",
+        "Yearning",
+        "Forlorn"
       ]
     },
     {
@@ -1046,10 +1052,6 @@
   },
   "workflowModules": [
     {
-      "id": "image",
-      "label": "Image"
-    },
-    {
       "id": "vocabulary",
       "label": "Vocabulary"
     },
@@ -1064,10 +1066,6 @@
     {
       "id": "interpret",
       "label": "Interpret"
-    },
-    {
-      "id": "compare",
-      "label": "Compare"
     }
   ],
   "interpretationFields": [

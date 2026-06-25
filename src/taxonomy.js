@@ -11,7 +11,7 @@ export const taxonomy = [
       },
       {
         label: "Sad",
-        terms: ["lonely", "isolated", "abandoned", "vulnerable", "victimized", "fragile", "despair", "grief", "powerless", "guilty", "ashamed", "remorseful", "depressed", "empty", "inferior", "hurt", "disappointed", "embarrassed"]
+        terms: ["lonely", "isolated", "abandoned", "vulnerable", "victimized", "fragile", "despair", "grief", "powerless", "guilty", "ashamed", "remorseful", "depressed", "empty", "inferior", "hurt", "disappointed", "embarrassed", "wistful", "yearning", "forlorn"]
       },
       {
         label: "Disgusted",
