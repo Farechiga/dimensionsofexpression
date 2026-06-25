@@ -1,0 +1,844 @@
+{
+  "generatedAt": "2026-06-25T01:53:48.493Z",
+  "taxonomy": [
+    {
+      "id": "emotion-wheel",
+      "title": "Emotions",
+      "source": "Emotion vocabulary",
+      "description": "Broad affect umbrellas with more specific feeling words.",
+      "groups": [
+        {
+          "label": "Happy",
+          "terms": [
+            "playful",
+            "cheeky",
+            "content",
+            "free",
+            "joyful",
+            "interested",
+            "curious",
+            "inquisitive",
+            "proud",
+            "successful",
+            "confident",
+            "accepted",
+            "respected",
+            "valued",
+            "powerful",
+            "courageous",
+            "creative",
+            "peaceful",
+            "loving",
+            "thankful",
+            "trusting",
+            "sensitive",
+            "close",
+            "optimistic",
+            "hopeful",
+            "inspired"
+          ]
+        },
+        {
+          "label": "Sad",
+          "terms": [
+            "lonely",
+            "isolated",
+            "abandoned",
+            "vulnerable",
+            "victimized",
+            "fragile",
+            "despair",
+            "grief",
+            "powerless",
+            "guilty",
+            "ashamed",
+            "remorseful",
+            "depressed",
+            "empty",
+            "inferior",
+            "hurt",
+            "disappointed",
+            "embarrassed"
+          ]
+        },
+        {
+          "label": "Disgusted",
+          "terms": [
+            "repelled",
+            "hesitant",
+            "horrified",
+            "awful",
+            "detestable",
+            "nauseated",
+            "disappointed",
+            "revolted",
+            "appalled",
+            "disapproving",
+            "judgmental",
+            "embarrassed",
+            "distant",
+            "withdrawn",
+            "numb",
+            "critical",
+            "skeptical",
+            "dismissive"
+          ]
+        },
+        {
+          "label": "Angry",
+          "terms": [
+            "let down",
+            "betrayed",
+            "resentful",
+            "humiliated",
+            "disrespected",
+            "ridiculed",
+            "bitter",
+            "indignant",
+            "violated",
+            "mad",
+            "furious",
+            "jealous",
+            "aggressive",
+            "provoked",
+            "hostile",
+            "frustrated",
+            "infuriated",
+            "annoyed"
+          ]
+        },
+        {
+          "label": "Fearful",
+          "terms": [
+            "scared",
+            "helpless",
+            "frightened",
+            "anxious",
+            "overwhelmed",
+            "worried",
+            "insecure",
+            "inadequate",
+            "inferior",
+            "weak",
+            "worthless",
+            "insignificant",
+            "rejected",
+            "excluded",
+            "persecuted",
+            "threatened",
+            "nervous",
+            "exposed"
+          ]
+        },
+        {
+          "label": "Uncomfortable",
+          "terms": [
+            "bored",
+            "indifferent",
+            "apathetic",
+            "busy",
+            "pressured",
+            "rushed",
+            "stressed",
+            "overwhelmed",
+            "out of control",
+            "tired",
+            "sleepy",
+            "unfocused"
+          ]
+        },
+        {
+          "label": "Surprised",
+          "terms": [
+            "startled",
+            "shocked",
+            "dismayed",
+            "confused",
+            "disillusioned",
+            "perplexed",
+            "amazed",
+            "astonished",
+            "awe",
+            "excited",
+            "eager",
+            "energetic"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "state-bearing",
+      "title": "State and Bearing",
+      "source": "Performance state vocabulary",
+      "description": "Overall state, bearing, and presentation that can be external, internal, or mixed.",
+      "groups": [
+        {
+          "label": "Composure",
+          "terms": [
+            "poised",
+            "composed",
+            "collected",
+            "steady",
+            "self-possessed",
+            "controlled",
+            "formal",
+            "gracious",
+            "contained",
+            "polished",
+            "serene",
+            "unruffled",
+            "measured",
+            "resolved",
+            "dignified"
+          ]
+        },
+        {
+          "label": "Agitation",
+          "terms": [
+            "harried",
+            "frazzled",
+            "rattled",
+            "flustered",
+            "frantic",
+            "keyed up",
+            "strained",
+            "overextended",
+            "restless",
+            "jittery",
+            "panicked",
+            "pressured",
+            "rushed",
+            "scattered",
+            "overloaded",
+            "frayed"
+          ]
+        },
+        {
+          "label": "Dysregulated",
+          "terms": [
+            "paranoid",
+            "spooked",
+            "jittery",
+            "absent-minded",
+            "lost in thought",
+            "haunted",
+            "dissociated",
+            "unsettled",
+            "skittish",
+            "overstimulated",
+            "disoriented",
+            "on edge",
+            "checked out",
+            "preoccupied",
+            "ungrounded"
+          ]
+        },
+        {
+          "label": "Postural state",
+          "terms": [
+            "slumped",
+            "upright",
+            "braced",
+            "collapsed",
+            "lifted",
+            "hunched",
+            "guarded",
+            "open",
+            "withdrawn",
+            "leaning in",
+            "leaning away",
+            "stiff",
+            "loose",
+            "rooted",
+            "unsteady"
+          ]
+        },
+        {
+          "label": "Energy state",
+          "terms": [
+            "buoyant",
+            "drained",
+            "depleted",
+            "charged",
+            "alert",
+            "dulled",
+            "sleepy",
+            "wired",
+            "heavy",
+            "light",
+            "frozen",
+            "fluid",
+            "activated",
+            "subdued",
+            "sparked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "core-affect",
+      "title": "Affect",
+      "source": "Russell circumplex / PAD / narrative change",
+      "description": "Low-level feeling tone, bodily quality, and affective change process.",
+      "groups": [
+        {
+          "label": "Valence",
+          "terms": [
+            "pleasant",
+            "unpleasant",
+            "bittersweet",
+            "ambivalent",
+            "neutral",
+            "wounded",
+            "warmed",
+            "soured",
+            "relieved"
+          ]
+        },
+        {
+          "label": "Activation",
+          "terms": [
+            "calm",
+            "alert",
+            "agitated",
+            "startled",
+            "frozen",
+            "energized",
+            "depleted",
+            "simmering",
+            "overwhelmed"
+          ]
+        },
+        {
+          "label": "Control",
+          "terms": [
+            "dominant",
+            "submissive",
+            "in command",
+            "unmoored",
+            "helpless",
+            "self-possessed",
+            "yielding",
+            "defiant",
+            "composed"
+          ]
+        },
+        {
+          "label": "Felt body state",
+          "terms": [
+            "held breath",
+            "released breath",
+            "tightened",
+            "expanded",
+            "collapsed",
+            "lifted",
+            "rooted",
+            "unsteady",
+            "buoyant"
+          ]
+        },
+        {
+          "label": "Change process",
+          "terms": [
+            "melting",
+            "hardening",
+            "cracking",
+            "softening",
+            "realizing",
+            "recovering",
+            "withdrawing",
+            "opening",
+            "bracing",
+            "letting go"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "appraisal",
+      "title": "Appraisal",
+      "source": "Scherer / Lazarus appraisal theory",
+      "description": "What the character seems to be evaluating about the situation.",
+      "groups": [
+        {
+          "label": "Event meaning",
+          "terms": [
+            "novel",
+            "familiar",
+            "expected",
+            "unexpected",
+            "important",
+            "trivial",
+            "irreversible",
+            "repairable",
+            "threatening",
+            "promising"
+          ]
+        },
+        {
+          "label": "Time direction",
+          "terms": [
+            "past wound",
+            "present recognition",
+            "future hope",
+            "future dread",
+            "memory surfacing",
+            "anticipation",
+            "aftershock",
+            "turning point"
+          ]
+        },
+        {
+          "label": "Goal relation",
+          "terms": [
+            "goal opening",
+            "goal blocked",
+            "loss confirmed",
+            "hope restored",
+            "obligation activated",
+            "choice narrowing",
+            "choice expanding",
+            "cost recognized"
+          ]
+        },
+        {
+          "label": "Agency and blame",
+          "terms": [
+            "self-caused",
+            "other-caused",
+            "shared responsibility",
+            "fate-driven",
+            "earned",
+            "undeserved",
+            "forgiven",
+            "accused",
+            "witnessing"
+          ]
+        },
+        {
+          "label": "Coping and certainty",
+          "terms": [
+            "can cope",
+            "cannot cope",
+            "uncertain outcome",
+            "certainty arriving",
+            "bracing",
+            "surrendering",
+            "reframing",
+            "accepting"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "social-display",
+      "title": "Social Display",
+      "source": "Display rules / impression management / acting objective",
+      "description": "How the expression manages other people, norms, objectives, and social risk.",
+      "groups": [
+        {
+          "label": "Objective",
+          "terms": [
+            "to comfort",
+            "to persuade",
+            "to hide",
+            "to protect",
+            "to invite",
+            "to resist",
+            "to confess",
+            "to endure",
+            "to reassure",
+            "to test"
+          ]
+        },
+        {
+          "label": "Masking and leakage",
+          "terms": [
+            "masked pain",
+            "feigned smile",
+            "polite smile",
+            "leaking anger",
+            "suppressed tears",
+            "strained graciousness",
+            "cheerful cover",
+            "controlled face"
+          ]
+        },
+        {
+          "label": "Relational stance",
+          "terms": [
+            "inviting",
+            "appeasing",
+            "reassuring",
+            "withholding",
+            "defensive",
+            "challenging",
+            "protective",
+            "submissive",
+            "commanding",
+            "pleading"
+          ]
+        },
+        {
+          "label": "Audience orientation",
+          "terms": [
+            "performing for group",
+            "private break",
+            "seeking approval",
+            "saving face",
+            "avoiding burden",
+            "offering comfort",
+            "testing safety",
+            "keeping peace"
+          ]
+        }
+      ]
+    }
+  ],
+  "literatureNotes": [
+    "FACS keeps visible movement separate from interpretation by coding action units.",
+    "Russell and PAD models support continuous valence, activation, and dominance/control ratings.",
+    "Appraisal theories describe emotion as evaluation of novelty, goal relevance, agency, coping, and norm fit.",
+    "Display-rule research helps name masking, intensifying, suppressing, and socially managed expressions.",
+    "Acting and embodied vocabularies help translate static expressions into playable intention and felt state."
+  ],
+  "featuresActivated": [
+    {
+      "name": "Brows",
+      "terms": [
+        "furrowed",
+        "knitted",
+        "pinched",
+        "raised inner brows",
+        "arched",
+        "skeptical",
+        "pleading",
+        "alarmed",
+        "brooding",
+        "compressed",
+        "tilted",
+        "softened",
+        "asymmetrical",
+        "drawn together",
+        "lifted in worry"
+      ]
+    },
+    {
+      "name": "Eyes",
+      "terms": [
+        "wide",
+        "glassy",
+        "wet",
+        "searching",
+        "guarded",
+        "soft",
+        "hollow",
+        "alert",
+        "startled",
+        "focused",
+        "unfocused",
+        "narrowed",
+        "pleading",
+        "watchful",
+        "faraway"
+      ]
+    },
+    {
+      "name": "Gaze",
+      "terms": [
+        "direct",
+        "averted",
+        "downcast",
+        "sideward",
+        "fixed",
+        "flickering",
+        "approaching",
+        "withdrawing",
+        "measuring",
+        "exposed",
+        "deflecting",
+        "locked in",
+        "looking through",
+        "seeking safety",
+        "performing contact"
+      ]
+    },
+    {
+      "name": "Mouth",
+      "terms": [
+        "pressed",
+        "parted",
+        "tensed smile",
+        "soft smile",
+        "half smile",
+        "held smile",
+        "trembling",
+        "flattened",
+        "strained",
+        "open in shock",
+        "bitten lip",
+        "downturned",
+        "tight corners",
+        "polite smile",
+        "suppressed speech"
+      ]
+    },
+    {
+      "name": "Jaw",
+      "terms": [
+        "clenched",
+        "slack",
+        "braced",
+        "dropped",
+        "set",
+        "tight",
+        "controlled",
+        "quivering",
+        "held back",
+        "jutting",
+        "swallowing emotion",
+        "locked",
+        "released",
+        "stiffened",
+        "restrained"
+      ]
+    },
+    {
+      "name": "Cheeks and nose",
+      "terms": [
+        "lifted cheeks",
+        "flushed",
+        "tight cheeks",
+        "slack cheeks",
+        "wrinkled nose",
+        "softened cheeks",
+        "strained nasolabial fold",
+        "tearful fullness",
+        "smiling cheeks",
+        "suppressed disgust",
+        "compressed midface",
+        "warmed",
+        "drained",
+        "tense nostrils",
+        "micro-flinch"
+      ]
+    },
+    {
+      "name": "Head and posture",
+      "terms": [
+        "chin lifted",
+        "chin tucked",
+        "head tilted",
+        "head withdrawn",
+        "leaning in",
+        "leaning away",
+        "braced shoulders",
+        "open posture",
+        "collapsed posture",
+        "held still",
+        "turning away",
+        "offering",
+        "protective",
+        "formal",
+        "unsteady"
+      ]
+    }
+  ],
+  "emotionFamilies": [
+    {
+      "name": "Anger",
+      "defaults": [
+        "Angry",
+        "Exasperated"
+      ],
+      "terms": [
+        "Angry",
+        "Irritable",
+        "Annoyed",
+        "Aggravated",
+        "Envy",
+        "Resentful",
+        "Jealous",
+        "Disgust",
+        "Contempt",
+        "Revolted",
+        "Exasperated",
+        "Frustrated",
+        "Agitated",
+        "Rage",
+        "Hostile",
+        "Hate"
+      ]
+    },
+    {
+      "name": "Sadness",
+      "defaults": [
+        "Sad",
+        "Depressed"
+      ],
+      "terms": [
+        "Sad",
+        "Suffering",
+        "Agony",
+        "Hurt",
+        "Depressed",
+        "Sorrow",
+        "Disappointed",
+        "Dismayed",
+        "Displeased",
+        "Shameful",
+        "Regretful",
+        "Guilty",
+        "Neglected",
+        "Isolated",
+        "Lonely",
+        "Despair",
+        "Grief",
+        "Powerless"
+      ]
+    },
+    {
+      "name": "Surprise",
+      "defaults": [
+        "Dismayed",
+        "Surprised"
+      ],
+      "terms": [
+        "Surprised",
+        "Stunned",
+        "Shocked",
+        "Confused",
+        "Dismayed",
+        "Disillusioned",
+        "Amazed",
+        "Perplexed",
+        "Astonished",
+        "Overcome",
+        "Awe-struck",
+        "Speechless",
+        "Moved",
+        "Astounded",
+        "Stimulated",
+        "Touched"
+      ]
+    },
+    {
+      "name": "Joy",
+      "defaults": [
+        "Delighted",
+        "Excited"
+      ],
+      "terms": [
+        "Joyful",
+        "Content",
+        "Pleased",
+        "Satisfied",
+        "Amused",
+        "Happy",
+        "Jovial",
+        "Delighted",
+        "Cheerful",
+        "Blissful",
+        "Triumphant",
+        "Proud",
+        "Illustrious",
+        "Eager",
+        "Optimistic",
+        "Hopeful",
+        "Excited",
+        "Enthusiastic",
+        "Zeal",
+        "Euphoric",
+        "Elation",
+        "Jubilation",
+        "Enchanted"
+      ]
+    },
+    {
+      "name": "Fear",
+      "defaults": [
+        "Frightened",
+        "Anxious"
+      ],
+      "terms": [
+        "Fearful",
+        "Scared",
+        "Frightened",
+        "Helpless",
+        "Terror",
+        "Panic",
+        "Hysterical",
+        "Insecure",
+        "Inferior",
+        "Inadequate",
+        "Nervous",
+        "Worried",
+        "Anxious",
+        "Horror",
+        "Mortified",
+        "Dread"
+      ]
+    }
+  ],
+  "emotionFamilyAliases": {
+    "angry": "Anger",
+    "disgusted": "Anger",
+    "uncomfortable": "Fear",
+    "fearful": "Fear",
+    "unsure": "Fear",
+    "sad": "Sadness",
+    "weary": "Sadness",
+    "surprised": "Surprise",
+    "happy": "Joy"
+  },
+  "workflowModules": [
+    {
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "id": "vocabulary",
+      "label": "Vocabulary"
+    },
+    {
+      "id": "emotion",
+      "label": "Emotion"
+    },
+    {
+      "id": "signals",
+      "label": "Features Activated"
+    },
+    {
+      "id": "interpret",
+      "label": "Interpret"
+    },
+    {
+      "id": "compare",
+      "label": "Compare"
+    }
+  ],
+  "interpretationFields": [
+    {
+      "name": "Expression name",
+      "purpose": "A concise interpretive label for the complete expression."
+    },
+    {
+      "name": "Subtext",
+      "purpose": "A first-person statement of the implied internal or relational message."
+    },
+    {
+      "name": "Evidence",
+      "purpose": "Observed features and contextual reasoning supporting the interpretation."
+    }
+  ],
+  "assignmentBins": [
+    {
+      "name": "External",
+      "purpose": "What the face or body communicates, manages, performs, or offers outwardly."
+    },
+    {
+      "name": "Internal",
+      "purpose": "What the person may be feeling, processing, remembering, or protecting inwardly."
+    }
+  ]
+}
