@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-25T03:37:23.813Z",
+  "generatedAt": "2026-06-25T14:21:19.415Z",
   "taxonomy": [
     {
       "id": "emotion-wheel",
@@ -163,6 +163,26 @@
             "eager",
             "energetic"
           ]
+        },
+        {
+          "label": "Care",
+          "terms": [
+            "compassionate",
+            "tender",
+            "protective",
+            "affectionate",
+            "attuned",
+            "nurturing",
+            "devoted",
+            "forgiving",
+            "grateful",
+            "longing",
+            "concerned",
+            "mournful care",
+            "loyal",
+            "gentle",
+            "emotionally present"
+          ]
         }
       ]
     },
@@ -189,7 +209,17 @@
             "unruffled",
             "measured",
             "resolved",
-            "dignified"
+            "dignified",
+            "brittle",
+            "diplomatic",
+            "professional",
+            "self-monitoring",
+            "ceremonious",
+            "stoic",
+            "deliberate",
+            "restrained",
+            "watchful",
+            "quietly resolute"
           ]
         },
         {
@@ -210,7 +240,16 @@
             "rushed",
             "scattered",
             "overloaded",
-            "frayed"
+            "frayed",
+            "bristling",
+            "twitchy",
+            "breathless",
+            "short-fused",
+            "shakily contained",
+            "overclocked",
+            "simmering",
+            "fraying",
+            "vibrating with tension"
           ]
         },
         {
@@ -230,7 +269,17 @@
             "on edge",
             "checked out",
             "preoccupied",
-            "ungrounded"
+            "ungrounded",
+            "flooded",
+            "spiraling",
+            "shut down",
+            "numbed",
+            "scrambled",
+            "emotionally overloaded",
+            "dissociating",
+            "unmoored",
+            "stunned",
+            "unable to organize thought"
           ]
         },
         {
@@ -250,7 +299,19 @@
             "stiff",
             "loose",
             "rooted",
-            "unsteady"
+            "unsteady",
+            "recoiled",
+            "folded inward",
+            "squared up",
+            "half-turned",
+            "suspended",
+            "poised to move",
+            "shrinking",
+            "presenting",
+            "shielding",
+            "reaching",
+            "rooted in place",
+            "interrupted mid-motion"
           ]
         },
         {
@@ -270,7 +331,17 @@
             "fluid",
             "activated",
             "subdued",
-            "sparked"
+            "sparked",
+            "vigilant",
+            "spent",
+            "tremulous",
+            "gathered",
+            "low-burning",
+            "collapsing",
+            "reviving",
+            "suspended",
+            "heavy-limbed",
+            "sparking back to life"
           ]
         }
       ]
@@ -426,6 +497,65 @@
             "surrendering",
             "reframing",
             "accepting"
+          ]
+        },
+        {
+          "label": "Stakes",
+          "terms": [
+            "trivial",
+            "inconvenience",
+            "consequential",
+            "escalating",
+            "contained",
+            "temporary",
+            "reparable",
+            "irreversible",
+            "preventable",
+            "inevitable",
+            "identity-shaping",
+            "relationship-altering",
+            "life-changing",
+            "sacred or value-laden"
+          ]
+        },
+        {
+          "label": "Moral assessment",
+          "terms": [
+            "fair",
+            "unfair",
+            "deserved",
+            "undeserved",
+            "compassionate",
+            "cruel",
+            "violating",
+            "honorable",
+            "shameful",
+            "innocent",
+            "boundary crossed",
+            "promise broken",
+            "obligation unmet",
+            "mercy received",
+            "responsibility claimed"
+          ]
+        },
+        {
+          "label": "Relational meaning",
+          "terms": [
+            "safe",
+            "unsafe",
+            "trusted",
+            "betrayed",
+            "seen",
+            "misunderstood",
+            "believed",
+            "dismissed",
+            "welcomed",
+            "excluded",
+            "protected",
+            "abandoned",
+            "forgiven",
+            "accountable",
+            "emotionally held"
           ]
         }
       ]

@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=1.0.1";
+import { taxonomy } from "./taxonomy.js?v=1.0.2";
 
 const taxonomyOrder = [
   "emotion-wheel",

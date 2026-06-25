@@ -32,6 +32,10 @@ export const taxonomy = [
       {
         label: "Surprised",
         terms: ["startled", "shocked", "dismayed", "confused", "disillusioned", "perplexed", "amazed", "astonished", "awe", "excited", "eager", "energetic"]
+      },
+      {
+        label: "Care",
+        terms: ["compassionate", "tender", "protective", "affectionate", "attuned", "nurturing", "devoted", "forgiving", "grateful", "longing", "concerned", "mournful care", "loyal", "gentle", "emotionally present"]
       }
     ]
   },
@@ -43,23 +47,23 @@ export const taxonomy = [
     groups: [
       {
         label: "Composure",
-        terms: ["poised", "composed", "collected", "steady", "self-possessed", "controlled", "formal", "gracious", "contained", "polished", "serene", "unruffled", "measured", "resolved", "dignified"]
+        terms: ["poised", "composed", "collected", "steady", "self-possessed", "controlled", "formal", "gracious", "contained", "polished", "serene", "unruffled", "measured", "resolved", "dignified", "brittle", "diplomatic", "professional", "self-monitoring", "ceremonious", "stoic", "deliberate", "restrained", "watchful", "quietly resolute"]
       },
       {
         label: "Agitation",
-        terms: ["harried", "frazzled", "rattled", "flustered", "frantic", "keyed up", "strained", "overextended", "restless", "jittery", "panicked", "pressured", "rushed", "scattered", "overloaded", "frayed"]
+        terms: ["harried", "frazzled", "rattled", "flustered", "frantic", "keyed up", "strained", "overextended", "restless", "jittery", "panicked", "pressured", "rushed", "scattered", "overloaded", "frayed", "bristling", "twitchy", "breathless", "short-fused", "shakily contained", "overclocked", "simmering", "fraying", "vibrating with tension"]
       },
       {
         label: "Dysregulated",
-        terms: ["paranoid", "spooked", "jittery", "absent-minded", "lost in thought", "haunted", "dissociated", "unsettled", "skittish", "overstimulated", "disoriented", "on edge", "checked out", "preoccupied", "ungrounded"]
+        terms: ["paranoid", "spooked", "jittery", "absent-minded", "lost in thought", "haunted", "dissociated", "unsettled", "skittish", "overstimulated", "disoriented", "on edge", "checked out", "preoccupied", "ungrounded", "flooded", "spiraling", "shut down", "numbed", "scrambled", "emotionally overloaded", "dissociating", "unmoored", "stunned", "unable to organize thought"]
       },
       {
         label: "Postural state",
-        terms: ["slumped", "upright", "braced", "collapsed", "lifted", "hunched", "guarded", "open", "withdrawn", "leaning in", "leaning away", "stiff", "loose", "rooted", "unsteady"]
+        terms: ["slumped", "upright", "braced", "collapsed", "lifted", "hunched", "guarded", "open", "withdrawn", "leaning in", "leaning away", "stiff", "loose", "rooted", "unsteady", "recoiled", "folded inward", "squared up", "half-turned", "suspended", "poised to move", "shrinking", "presenting", "shielding", "reaching", "rooted in place", "interrupted mid-motion"]
       },
       {
         label: "Energy state",
-        terms: ["buoyant", "drained", "depleted", "charged", "alert", "dulled", "sleepy", "wired", "heavy", "light", "frozen", "fluid", "activated", "subdued", "sparked"]
+        terms: ["buoyant", "drained", "depleted", "charged", "alert", "dulled", "sleepy", "wired", "heavy", "light", "frozen", "fluid", "activated", "subdued", "sparked", "vigilant", "spent", "tremulous", "gathered", "low-burning", "collapsing", "reviving", "suspended", "heavy-limbed", "sparking back to life"]
       }
     ]
   },
@@ -116,6 +120,18 @@ export const taxonomy = [
       {
         label: "Coping and certainty",
         terms: ["can cope", "cannot cope", "uncertain outcome", "certainty arriving", "bracing", "surrendering", "reframing", "accepting"]
+      },
+      {
+        label: "Stakes",
+        terms: ["trivial", "inconvenience", "consequential", "escalating", "contained", "temporary", "reparable", "irreversible", "preventable", "inevitable", "identity-shaping", "relationship-altering", "life-changing", "sacred or value-laden"]
+      },
+      {
+        label: "Moral assessment",
+        terms: ["fair", "unfair", "deserved", "undeserved", "compassionate", "cruel", "violating", "honorable", "shameful", "innocent", "boundary crossed", "promise broken", "obligation unmet", "mercy received", "responsibility claimed"]
+      },
+      {
+        label: "Relational meaning",
+        terms: ["safe", "unsafe", "trusted", "betrayed", "seen", "misunderstood", "believed", "dismissed", "welcomed", "excluded", "protected", "abandoned", "forgiven", "accountable", "emotionally held"]
       }
     ]
   },
