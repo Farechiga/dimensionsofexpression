@@ -12,7 +12,6 @@ const orderedTaxonomy = taxonomyOrder
   .filter(Boolean);
 
 const modules = [
-  { id: "image", label: "Image", isComplete: (draft) => Boolean(draft.imageName) },
   { id: "vocabulary", label: "Vocabulary", isComplete: (draft) => draft.externalTerms?.length > 0 || draft.internalTerms?.length > 0 },
   {
     id: "emotion",
@@ -20,8 +19,7 @@ const modules = [
     isComplete: (draft) => Object.keys(draft.blend || {}).length > 0 || Object.keys(draft.whatJustHappened || {}).length > 0
   },
   { id: "signals", label: "Features Activated", isComplete: (draft) => hasNonDefault(draft.signals, 0) || Object.keys(draft.signalDescriptors || {}).length > 0 },
-  { id: "interpret", label: "Interpret", isComplete: (draft) => Boolean(draft.name && draft.name !== "Untitled reading" && draft.subtext && draft.evidence) },
-  { id: "compare", label: "Compare", isComplete: (draft) => draft.savedReadings > 0 }
+  { id: "interpret", label: "Interpret", isComplete: (draft) => Boolean(draft.name && draft.name !== "Untitled reading" && draft.subtext && draft.evidence) }
 ];
 
 const signalAttributes = [

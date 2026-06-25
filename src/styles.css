@@ -284,7 +284,7 @@ h3 {
 
 .module-checklist {
   display: grid;
-  grid-template-columns: repeat(6, 18px);
+  grid-template-columns: repeat(4, 18px);
   gap: 10px;
   align-items: center;
 }
@@ -1035,19 +1035,19 @@ form {
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  gap: 5px;
+  gap: 3px;
   max-height: none;
   overflow: visible;
 }
 
 .dashboard-chip-list span {
-  min-height: 22px;
+  min-height: 18px;
   border: 1px solid #c6d8d4;
   border-radius: 7px;
-  padding: 2px 6px;
+  padding: 1px 4px;
   background: #eef5f2;
   color: var(--teal);
-  font-size: 0.68rem;
+  font-size: 0.58rem;
   font-weight: 760;
 }
 
