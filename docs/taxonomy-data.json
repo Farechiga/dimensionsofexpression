@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-25T14:21:19.415Z",
+  "generatedAt": "2026-06-25T14:40:09.781Z",
   "taxonomy": [
     {
       "id": "emotion-wheel",
@@ -601,6 +601,11 @@
             "appeasing",
             "reassuring",
             "compromising",
+            "contrite",
+            "deferential",
+            "reverent",
+            "sorry",
+            "apologetic",
             "withholding",
             "defensive",
             "challenging",

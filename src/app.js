@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=1.0.2";
+import { taxonomy } from "./taxonomy.js?v=1.0.3";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -1348,7 +1348,6 @@ function renderTaxonomySearchAction(message = "") {
         <button type="button" data-search-destination="external" aria-pressed="${state.searchDestination === "external"}">External</button>
         <button type="button" data-search-destination="internal" aria-pressed="${state.searchDestination === "internal"}">Internal</button>
       </div>
-      <button class="search-add-button" type="button" data-search-add${state.searchDestination ? "" : " disabled"}>Add</button>
     `;
     return;
   }
@@ -1437,11 +1436,30 @@ function applyTaxonomySearchSelection() {
   clearTaxonomySearch(`Added ${item.term} at ${intensity}`);
 }
 
+function hasPendingSearchDescription() {
+  return Boolean(state.searchSelection && state.searchSelection.type !== "vocabulary" && $("#taxonomySearchIntensity"));
+}
+
+function confirmPendingSearchDescription() {
+  if (!hasPendingSearchDescription()) return true;
+  if (!window.confirm("Add description?")) return false;
+  applyTaxonomySearchSelection();
+  return true;
+}
+
 function bindTaxonomySearch() {
   const input = $("#taxonomySearch");
   const results = $("#taxonomySearchResults");
   const action = $("#taxonomySearchAction");
   input.addEventListener("input", () => {
+    const query = input.value;
+    if (hasPendingSearchDescription()) {
+      if (!confirmPendingSearchDescription()) {
+        input.value = state.searchSelection.term;
+        return;
+      }
+      input.value = query;
+    }
     state.searchSelection = null;
     state.searchDestination = "";
     renderTaxonomySearchAction();
@@ -1475,7 +1493,7 @@ function bindTaxonomySearch() {
     const destination = event.target.closest("[data-search-destination]")?.dataset.searchDestination;
     if (destination) {
       state.searchDestination = destination;
-      renderTaxonomySearchAction();
+      applyTaxonomySearchSelection();
       return;
     }
     if (event.target.closest("[data-search-add]")) applyTaxonomySearchSelection();
@@ -1486,8 +1504,16 @@ function bindTaxonomySearch() {
     }
   });
   document.addEventListener("click", (event) => {
+    if (hasPendingSearchDescription() && !event.target.closest(".taxonomy-search")) {
+      if (!confirmPendingSearchDescription()) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        $("#taxonomySearchIntensity")?.focus();
+        return;
+      }
+    }
     if (!event.target.closest(".taxonomy-search-combobox")) setSearchResultsOpen(false);
-  });
+  }, true);
 }
 
 function openWriteIn(bin) {
