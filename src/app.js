@@ -208,6 +208,9 @@ const emotionFamilyAliases = {
 const radarColors = ["#246a73", "#bd5d4e", "#7a6fa5", "#c99a2e", "#577a4a", "#9a5573"];
 
 const readingsDatabasePath = "./data/readings.json";
+const imageUploadDatabaseName = "dimensions-of-expression";
+const imageUploadStoreName = "uploaded-images";
+const imageUploadPin = "0511";
 
 function sortedEntries(values = {}, transform = (value) => value) {
   return Object.fromEntries(
@@ -357,16 +360,71 @@ function hasNonDefault(values = {}, defaultValue) {
 }
 
 async function loadAssetManifest() {
+  let manifestAssets = [];
   try {
     const response = await fetch("./assets/manifest.json", { cache: "no-store" });
     if (!response.ok) throw new Error("Manifest unavailable");
     const manifest = await response.json();
-    state.assets = Array.isArray(manifest.images) ? manifest.images : [];
+    manifestAssets = Array.isArray(manifest.images) ? manifest.images : [];
   } catch {
-    state.assets = [];
+    manifestAssets = [];
   }
+  const uploadedAssets = await loadUploadedAssets();
+  state.assets = [...manifestAssets, ...uploadedAssets];
   renderCharacterFilter();
   renderAssetLibrary();
+}
+
+function openImageUploadDatabase() {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) {
+      reject(new Error("This browser does not support persistent image uploads."));
+      return;
+    }
+    const request = window.indexedDB.open(imageUploadDatabaseName, 1);
+    request.onupgradeneeded = () => {
+      const database = request.result;
+      if (!database.objectStoreNames.contains(imageUploadStoreName)) {
+        database.createObjectStore(imageUploadStoreName, { keyPath: "id" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("Could not open image storage."));
+  });
+}
+
+async function loadUploadedAssets() {
+  try {
+    const database = await openImageUploadDatabase();
+    const records = await new Promise((resolve, reject) => {
+      const transaction = database.transaction(imageUploadStoreName, "readonly");
+      const request = transaction.objectStore(imageUploadStoreName).getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+    database.close();
+    return records
+      .sort((left, right) => String(left.createdAt).localeCompare(String(right.createdAt)))
+      .map((record) => ({
+        ...record,
+        src: URL.createObjectURL(record.imageBlob)
+      }));
+  } catch (error) {
+    console.warn("Uploaded images could not be loaded.", error);
+    return [];
+  }
+}
+
+async function saveUploadedAsset(record) {
+  const database = await openImageUploadDatabase();
+  await new Promise((resolve, reject) => {
+    const transaction = database.transaction(imageUploadStoreName, "readwrite");
+    transaction.objectStore(imageUploadStoreName).put(record);
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+  database.close();
 }
 
 async function loadReadingDatabase() {
@@ -391,6 +449,7 @@ function assetFileName(asset) {
 }
 
 function assetCharacter(asset) {
+  if (asset?.character) return normalizeCharacterName(asset.character);
   const baseName = assetFileName(asset).replace(/\.[^.]+$/, "").trim();
   const underscoreIndex = baseName.indexOf("_");
   const rawName = underscoreIndex > 0 ? baseName.slice(0, underscoreIndex).trim() : baseName.split(/\s+/)[0] || "Unknown";
@@ -490,6 +549,7 @@ function setCurrentImage(image) {
   renderReadings();
   renderDashboard();
   renderModuleChecklist();
+  renderImageStageTools();
 }
 
 function clearCurrentSelections() {
@@ -563,6 +623,123 @@ function changeImage(delta) {
   if (!state.assets.length) ensureGeneratedImages();
   clearCurrentSelections();
   showImageAt(state.imageIndex + delta);
+}
+
+function renderImageStageTools() {
+  const button = $("#playVideoBtn");
+  if (!button) return;
+  const videoUrl = state.currentImage?.videoUrl || "";
+  button.disabled = !videoUrl;
+  button.title = videoUrl ? "Play linked video" : "No video link for this image";
+}
+
+function renderCharacterSuggestions() {
+  const datalist = $("#characterSuggestions");
+  if (!datalist) return;
+  datalist.innerHTML = characterOptions()
+    .map((character) => `<option value="${escapeHtml(character)}"></option>`)
+    .join("");
+}
+
+function openImageUploadDialog() {
+  const dialog = $("#imageUploadDialog");
+  $("#imageUploadForm").reset();
+  $("#imageUploadError").textContent = "";
+  renderCharacterSuggestions();
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+  } else {
+    dialog.setAttribute("open", "");
+  }
+  $("#imageUploadPin").focus();
+}
+
+function closeImageUploadDialog() {
+  const dialog = $("#imageUploadDialog");
+  if (typeof dialog.close === "function") dialog.close();
+  else dialog.removeAttribute("open");
+}
+
+function normalizedVideoUrl(value) {
+  const cleanValue = value.trim();
+  if (!cleanValue) return "";
+  const url = new URL(cleanValue);
+  if (!["http:", "https:"].includes(url.protocol)) throw new Error("Video link must begin with http:// or https://.");
+  return url.href;
+}
+
+async function addUploadedImage(event) {
+  event.preventDefault();
+  const errorTarget = $("#imageUploadError");
+  errorTarget.textContent = "";
+  const pin = $("#imageUploadPin").value.trim();
+  const file = $("#imageUploadFile").files?.[0];
+  const character = $("#imageUploadCharacter").value.trim();
+  const fileExtension = file?.name.split(".").pop()?.toLowerCase() || "";
+
+  if (pin !== imageUploadPin) {
+    errorTarget.textContent = "Incorrect PIN.";
+    $("#imageUploadPin").focus();
+    return;
+  }
+  if (!file || (!["image/png", "image/jpeg"].includes(file.type) && !["png", "jpg", "jpeg"].includes(fileExtension))) {
+    errorTarget.textContent = "Choose a PNG or JPG image.";
+    return;
+  }
+  if (!character) {
+    errorTarget.textContent = "Character name is required.";
+    return;
+  }
+  if (!confirmImageChange()) return;
+
+  let videoUrl = "";
+  try {
+    videoUrl = normalizedVideoUrl($("#imageUploadVideo").value);
+  } catch (error) {
+    errorTarget.textContent = error.message;
+    return;
+  }
+
+  const id = `upload-${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+  const fileStem = file.name.replace(/\.[^.]+$/, "").trim() || "uploaded expression";
+  const title = `${character} ${fileStem}`;
+  const storedRecord = {
+    id,
+    title,
+    character,
+    fileName: file.name,
+    mimeType: file.type,
+    imageBlob: file,
+    videoUrl,
+    rightsMode: "browser-upload",
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    await saveUploadedAsset(storedRecord);
+  } catch (error) {
+    errorTarget.textContent = "This image could not be saved in the browser.";
+    console.error(error);
+    return;
+  }
+
+  const asset = {
+    ...storedRecord,
+    src: URL.createObjectURL(file)
+  };
+  state.assets.push(asset);
+  state.characterFilter = character;
+  clearCurrentSelections();
+  renderCharacterFilter();
+  renderAssetLibrary();
+  closeImageUploadDialog();
+  showImageAt(0);
+}
+
+function openCurrentImageVideo() {
+  const videoUrl = state.currentImage?.videoUrl;
+  if (!videoUrl) return;
+  window.open(videoUrl, "_blank", "noopener,noreferrer");
 }
 
 function sliderRow(name, options = {}) {
@@ -1159,10 +1336,9 @@ function selectAsset(asset) {
   $("#previewImage").dataset.name = assetTitle(asset);
   $("#imageStage").classList.add("has-image");
   setCurrentImage({
-    id: asset.id,
+    ...asset,
     title: assetTitle(asset),
     name: assetTitle(asset),
-    src: asset.src,
     rightsMode: asset.rightsMode || "local-study"
   });
 }
@@ -1627,6 +1803,13 @@ $("#nextBtn").addEventListener("click", () => setStep(state.step + 1));
 $("#readingForm").addEventListener("submit", saveReading);
 $("#prevImageBtn").addEventListener("click", () => changeImage(-1));
 $("#nextImageBtn").addEventListener("click", () => changeImage(1));
+$("#addImageBtn").addEventListener("click", openImageUploadDialog);
+$("#playVideoBtn").addEventListener("click", openCurrentImageVideo);
+$("#closeImageUploadBtn").addEventListener("click", closeImageUploadDialog);
+$("#imageUploadForm").addEventListener("submit", addUploadedImage);
+$("#imageUploadDialog").addEventListener("click", (event) => {
+  if (event.target === event.currentTarget) closeImageUploadDialog();
+});
 $("#characterFilter").addEventListener("change", (event) => {
   const previousFilter = state.characterFilter;
   if (!confirmImageChange()) {

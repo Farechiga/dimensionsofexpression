@@ -49,3 +49,15 @@ The expressive vocabulary lives in `src/taxonomy.js` so categories and terms can
 3. Run the local site and use the character dropdown plus arrows to browse frames.
 
 Images inside `assets/private/` are ignored by Git. This keeps study frames local unless you deliberately move public-safe assets elsewhere. The static browser app cannot write files back into `assets/`; repository images should be added through the folder and manifest.
+
+## Browser Uploads
+
+The plus button in the image viewer stores approved PNG/JPG uploads and their metadata in IndexedDB. These images persist in that browser and join the carousel and character filter without changing `assets/manifest.json`.
+
+For shared, cross-device use, replace the IndexedDB adapter with:
+
+- a private Supabase Storage bucket for image files;
+- an `images` table containing `id`, `character`, `title`, `storage_path`, `video_url`, `created_by`, and `created_at`;
+- row-level policies that allow authenticated or anonymous users to read approved records while restricting uploads.
+
+The four-digit browser PIN is a lightweight workflow gate. Real access protection should be enforced by Supabase authentication, storage policies, and server-side validation.

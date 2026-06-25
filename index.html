@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=1.0.4">
+    <link rel="stylesheet" href="./src/styles.css?v=1.1.0">
   </head>
   <body>
     <main class="app-shell">
@@ -41,6 +41,14 @@
               <button id="prevImageBtn" class="image-arrow image-arrow-left" type="button" aria-label="Previous image">‹</button>
               <img id="previewImage" alt="">
               <button id="nextImageBtn" class="image-arrow image-arrow-right" type="button" aria-label="Next image">›</button>
+              <div class="image-stage-tools">
+                <button id="playVideoBtn" class="image-stage-tool" type="button" aria-label="Play linked video" title="Play linked video">
+                  <img src="./assets/play_video_icon.png" alt="">
+                </button>
+                <button id="addImageBtn" class="image-stage-tool image-stage-tool-add" type="button" aria-label="Add image" title="Add image">
+                  <img src="./assets/add_image_icon.png" alt="">
+                </button>
+              </div>
             </div>
             <div class="panel-section">
               <label class="character-filter">
@@ -152,6 +160,35 @@
         </section>
       </section>
     </main>
-    <script src="./src/app.js?v=1.0.4" type="module"></script>
+
+    <dialog id="imageUploadDialog" class="image-upload-dialog">
+      <form id="imageUploadForm" class="image-upload-form">
+        <header>
+          <h2>Add image</h2>
+          <button id="closeImageUploadBtn" type="button" aria-label="Close">×</button>
+        </header>
+        <label>
+          <span>4 digit PIN</span>
+          <input id="imageUploadPin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required>
+        </label>
+        <label>
+          <span>Image</span>
+          <input id="imageUploadFile" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" required>
+        </label>
+        <label>
+          <span>Character name</span>
+          <input id="imageUploadCharacter" type="text" list="characterSuggestions" autocomplete="off" required>
+          <datalist id="characterSuggestions"></datalist>
+        </label>
+        <label>
+          <span>Video link <small>optional</small></span>
+          <input id="imageUploadVideo" type="url" inputmode="url" placeholder="https://">
+        </label>
+        <p id="imageUploadError" class="image-upload-error" role="alert"></p>
+        <button class="primary-button" type="submit">Add to viewer</button>
+      </form>
+    </dialog>
+
+    <script src="./src/app.js?v=1.1.0" type="module"></script>
   </body>
 </html>
