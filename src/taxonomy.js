@@ -135,7 +135,7 @@ export const taxonomy = [
       },
       {
         label: "Relational stance",
-        terms: ["inviting", "appeasing", "reassuring", "withholding", "defensive", "challenging", "protective", "submissive", "commanding", "pleading"]
+        terms: ["inviting", "appeasing", "reassuring", "compromising", "withholding", "defensive", "challenging", "protective", "submissive", "commanding", "pleading"]
       },
       {
         label: "Audience orientation",

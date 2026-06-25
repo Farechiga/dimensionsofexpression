@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=0.7.9";
+import { taxonomy } from "./taxonomy.js?v=1.0.1";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -27,7 +27,7 @@ const modules = [
 const signalAttributes = [
   {
     name: "Brows",
-    terms: ["furrowed", "knitted", "pinched", "raised inner brows", "arched", "skeptical", "pleading", "alarmed", "brooding", "compressed", "tilted", "softened", "asymmetrical", "drawn together", "lifted in worry"]
+    terms: ["furrowed", "knitted", "pinched", "raised inner brows", "raised in delight", "raised in surprise", "arched", "skeptical", "pleading", "alarmed", "brooding", "compressed", "tilted", "softened", "asymmetrical", "drawn together", "lifted in worry"]
   },
   {
     name: "Eyes",
@@ -47,7 +47,7 @@ const signalAttributes = [
   },
   {
     name: "Cheeks and nose",
-    terms: ["lifted cheeks", "flushed", "tight cheeks", "slack cheeks", "wrinkled nose", "softened cheeks", "strained nasolabial fold", "tearful fullness", "smiling cheeks", "suppressed disgust", "compressed midface", "warmed", "drained", "tense nostrils", "micro-flinch"]
+    terms: ["lifted cheeks", "flushed", "tight cheeks", "slack cheeks", "wrinkled nose", "softened cheeks", "strained nasolabial fold", "tearful fullness", "smiling cheeks", "suppressed disgust", "compressed midface", "warmed", "drained", "tense nostrils", "flared nostrils", "micro-flinch"]
   },
   {
     name: "Head and posture",
