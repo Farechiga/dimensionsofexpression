@@ -618,6 +618,12 @@ function uploadFileExtension(record) {
   return record.mimeType === "image/png" ? "png" : "jpg";
 }
 
+function normalizedImageMimeType(file, fileExtension = "") {
+  if (file?.type === "image/png" || fileExtension === "png") return "image/png";
+  if (file?.type === "image/jpeg" || file?.type === "image/jpg" || ["jpg", "jpeg"].includes(fileExtension)) return "image/jpeg";
+  return "";
+}
+
 async function preserveAssetInSupabase(record, captchaToken = "") {
   const client = await initializeSupabaseImages({ captchaToken });
   if (!client || !supabaseUser) return null;
@@ -899,11 +905,11 @@ function renderImageUploadStorageNote() {
   const turnstileReady = !hasTurnstileConfig() || Boolean(state.turnstileToken);
   note.classList.toggle("is-cloud-ready", cloudReady && turnstileReady);
   if (!cloudReady) {
-    note.textContent = "Supabase is not configured yet. Images added here are only cached in this browser until cloud storage is connected.";
+    note.textContent = "Images added here stay available in this browser.";
   } else if (!turnstileReady) {
-    note.textContent = "Complete the Turnstile check to preserve this upload in Supabase Storage.";
+    note.textContent = "Complete verification to add this image.";
   } else {
-    note.textContent = "Images will be preserved in Supabase Storage and remembered across browsers.";
+    note.textContent = "Verification complete. Ready to add image.";
   }
 }
 
@@ -945,13 +951,14 @@ async function addUploadedImage(event) {
   const file = $("#imageUploadFile").files?.[0];
   const character = $("#imageUploadCharacter").value.trim();
   const fileExtension = file?.name.split(".").pop()?.toLowerCase() || "";
+  const mimeType = normalizedImageMimeType(file, fileExtension);
 
   if (pin !== imageUploadPin) {
     errorTarget.textContent = "Incorrect PIN.";
     $("#imageUploadPin").focus();
     return;
   }
-  if (!file || (!["image/png", "image/jpeg"].includes(file.type) && !["png", "jpg", "jpeg"].includes(fileExtension))) {
+  if (!file || !mimeType) {
     errorTarget.textContent = "Choose a PNG or JPG image.";
     return;
   }
@@ -977,7 +984,7 @@ async function addUploadedImage(event) {
     title,
     character,
     fileName: file.name,
-    mimeType: file.type,
+    mimeType,
     imageBlob: file,
     videoUrl,
     rightsMode: "browser-upload",
@@ -998,7 +1005,7 @@ async function addUploadedImage(event) {
     const cloudId = await preserveAssetInSupabase(storedRecord, captchaToken);
     if (!cloudId) {
       await saveUploadedAsset(storedRecord);
-      window.alert("Image saved only in this browser. Configure Supabase Storage to preserve uploads across sessions and devices.");
+      window.alert("Image added to this browser. Shared saving is still being connected.");
     } else {
       resetTurnstileWidget();
     }
@@ -1007,7 +1014,7 @@ async function addUploadedImage(event) {
     resetTurnstileWidget();
     try {
       await saveUploadedAsset(storedRecord);
-      window.alert("Cloud preservation failed, so this image was saved only in this browser.");
+      window.alert("Image added to this browser. Shared saving is still being connected.");
     } catch (localError) {
       errorTarget.textContent = "This image could not be preserved.";
       console.error(localError);
