@@ -204,6 +204,10 @@
           <input id="customTermValue" type="text" autocomplete="off" required>
         </label>
         <label>
+          <span>4 digit PIN</span>
+          <input id="customTermPin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required>
+        </label>
+        <label>
           <span>Term type</span>
           <select id="customTermType">
             <option value="vocabulary">Emotion tag</option>
@@ -225,6 +229,6 @@
       </form>
     </dialog>
 
-    <script src="./src/app.js?v=1.2.8" type="module"></script>
+    <script src="./src/app.js?v=1.2.9" type="module"></script>
   </body>
 </html>

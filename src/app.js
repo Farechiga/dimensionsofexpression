@@ -2193,6 +2193,11 @@ function customTermDefinitionFromForm() {
 
 function saveCustomTerm(event) {
   event.preventDefault();
+  if ($("#customTermPin").value !== imageUploadPin) {
+    $("#customTermNote").textContent = "Enter the correct PIN to add a term.";
+    $("#customTermPin").focus();
+    return;
+  }
   const definition = customTermDefinitionFromForm();
   const result = addCustomTermDefinition(definition);
   taxonomySearchIndex = buildSearchIndex();
