@@ -500,8 +500,7 @@ async function initializeSupabaseImages(options = {}) {
   if (supabaseClient && supabaseUser) return supabaseClient;
   const captchaToken = options.captchaToken || "";
   try {
-    const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
-    supabaseClient = createClient(appConfig.supabaseUrl, appConfig.supabasePublishableKey);
+    supabaseClient = await getSupabaseClient();
     const { data: sessionData } = await supabaseClient.auth.getSession();
     if (sessionData.session?.user) {
       supabaseUser = sessionData.session.user;
@@ -524,8 +523,16 @@ async function initializeSupabaseImages(options = {}) {
   }
 }
 
+async function getSupabaseClient() {
+  if (!hasSupabaseImageConfig()) return null;
+  if (supabaseClient) return supabaseClient;
+  const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
+  supabaseClient = createClient(appConfig.supabaseUrl, appConfig.supabasePublishableKey);
+  return supabaseClient;
+}
+
 async function loadSupabaseAssets() {
-  const client = await initializeSupabaseImages();
+  const client = await getSupabaseClient();
   if (!client) return [];
   try {
     const { data: rows, error } = await client
@@ -533,19 +540,15 @@ async function loadSupabaseAssets() {
       .select("id, character, title, storage_path, video_url, mime_type, original_filename, created_at")
       .order("created_at", { ascending: true });
     if (error) throw error;
-    return (await Promise.all((rows || []).map(async (row) => {
-      const { data, error: signedUrlError } = await client.storage
+    return (rows || []).map((row) => {
+      const { data } = client.storage
         .from(appConfig.supabaseImageBucket)
-        .createSignedUrl(row.storage_path, 60 * 60 * 24 * 7);
-      if (signedUrlError) {
-        console.warn(`Could not create a signed URL for ${row.storage_path}.`, signedUrlError);
-        return null;
-      }
+        .getPublicUrl(row.storage_path);
       return {
         id: row.id,
         title: row.title,
         character: row.character,
-        src: data.signedUrl,
+        src: data.publicUrl,
         storagePath: row.storage_path,
         videoUrl: row.video_url || "",
         mimeType: row.mime_type,
@@ -553,7 +556,7 @@ async function loadSupabaseAssets() {
         rightsMode: "supabase-storage",
         createdAt: row.created_at
       };
-    }))).filter(Boolean);
+    });
   } catch (error) {
     console.warn("Supabase images could not be loaded.", error);
     return [];
@@ -1005,8 +1008,9 @@ async function addUploadedImage(event) {
     const cloudId = await preserveAssetInSupabase(storedRecord, captchaToken);
     if (!cloudId) {
       await saveUploadedAsset(storedRecord);
-      window.alert("Image added to this browser. Shared saving is still being connected.");
+      window.alert("Image added on this device only. It will not appear for other visitors yet.");
     } else {
+      window.alert("Image added and shared.");
       resetTurnstileWidget();
     }
   } catch (error) {
@@ -1014,7 +1018,7 @@ async function addUploadedImage(event) {
     resetTurnstileWidget();
     try {
       await saveUploadedAsset(storedRecord);
-      window.alert("Image added to this browser. Shared saving is still being connected.");
+      window.alert("Image added on this device only. It will not appear for other visitors yet.");
     } catch (localError) {
       errorTarget.textContent = "This image could not be preserved.";
       console.error(localError);

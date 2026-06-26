@@ -29,9 +29,10 @@ create unique index if not exists images_storage_path_unique_idx on public.image
 alter table public.images enable row level security;
 
 drop policy if exists "Authenticated users can read images" on public.images;
-create policy "Authenticated users can read images"
+drop policy if exists "Anyone can read shared images" on public.images;
+create policy "Anyone can read shared images"
 on public.images for select
-to authenticated
+to anon, authenticated
 using (true);
 
 drop policy if exists "Users can add their own images" on public.images;
@@ -51,7 +52,7 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values (
   'expression-images',
   'expression-images',
-  false,
+  true,
   10485760,
   array['image/png', 'image/jpeg']
 )
@@ -61,9 +62,10 @@ on conflict (id) do update set
   allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "Authenticated users can view expression images" on storage.objects;
-create policy "Authenticated users can view expression images"
+drop policy if exists "Anyone can view expression images" on storage.objects;
+create policy "Anyone can view expression images"
 on storage.objects for select
-to authenticated
+to anon, authenticated
 using (bucket_id = 'expression-images');
 
 drop policy if exists "Users can upload expression images to their folder" on storage.objects;
