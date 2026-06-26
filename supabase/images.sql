@@ -5,6 +5,7 @@ create table if not exists public.images (
   storage_path text not null unique,
   video_url text,
   mime_type text not null check (mime_type in ('image/png', 'image/jpeg')),
+  filename text not null,
   original_filename text not null,
   created_by uuid not null references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
@@ -18,10 +19,34 @@ alter table public.images add column if not exists title text;
 alter table public.images add column if not exists storage_path text;
 alter table public.images add column if not exists video_url text;
 alter table public.images add column if not exists mime_type text;
+alter table public.images add column if not exists filename text;
 alter table public.images add column if not exists original_filename text;
 alter table public.images add column if not exists created_by uuid references auth.users(id) on delete cascade;
 alter table public.images add column if not exists created_at timestamptz default now();
 alter table public.images alter column created_at set default now();
+
+update public.images
+set filename = coalesce(
+  nullif(filename, ''),
+  nullif(original_filename, ''),
+  nullif(regexp_replace(coalesce(storage_path, ''), '^.*/', ''), ''),
+  id,
+  'uploaded-image'
+)
+where filename is null or filename = '';
+
+update public.images
+set original_filename = coalesce(
+  nullif(original_filename, ''),
+  nullif(filename, ''),
+  nullif(regexp_replace(coalesce(storage_path, ''), '^.*/', ''), ''),
+  id,
+  'uploaded-image'
+)
+where original_filename is null or original_filename = '';
+
+alter table public.images alter column filename set not null;
+alter table public.images alter column original_filename set not null;
 
 create unique index if not exists images_id_unique_idx on public.images (id);
 create unique index if not exists images_storage_path_unique_idx on public.images (storage_path);

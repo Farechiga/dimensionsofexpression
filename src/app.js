@@ -537,7 +537,7 @@ async function loadSupabaseAssets() {
   try {
     const { data: rows, error } = await client
       .from("images")
-      .select("id, character, title, storage_path, video_url, mime_type, original_filename, created_at")
+      .select("id, character, title, storage_path, video_url, mime_type, original_filename, filename, created_at")
       .order("created_at", { ascending: true });
     if (error) throw error;
     return (rows || []).map((row) => {
@@ -552,7 +552,7 @@ async function loadSupabaseAssets() {
         storagePath: row.storage_path,
         videoUrl: row.video_url || "",
         mimeType: row.mime_type,
-        fileName: row.original_filename,
+        fileName: row.original_filename || row.filename,
         rightsMode: "supabase-storage",
         createdAt: row.created_at
       };
@@ -627,6 +627,11 @@ function normalizedImageMimeType(file, fileExtension = "") {
   return "";
 }
 
+function isDuplicateStorageObjectError(error) {
+  const message = String(error?.message || error || "").toLowerCase();
+  return message.includes("duplicate") || message.includes("already exists") || message.includes("bucketid_objname");
+}
+
 function sharedSaveError(stage, error) {
   const message = error?.message || String(error || "Unknown error");
   const wrapped = new Error(`${stage}: ${message}`);
@@ -687,7 +692,9 @@ async function preserveAssetInSupabase(record, captchaToken = "") {
       contentType: record.mimeType || record.imageBlob.type,
       upsert: false
     });
-  if (uploadError) throw sharedSaveError("Storage upload", uploadError);
+  if (uploadError && !isDuplicateStorageObjectError(uploadError)) {
+    throw sharedSaveError("Storage upload", uploadError);
+  }
 
   const { error: insertError } = await client.from("images").insert({
     id: record.id,
@@ -696,6 +703,7 @@ async function preserveAssetInSupabase(record, captchaToken = "") {
     storage_path: storagePath,
     video_url: record.videoUrl || null,
     mime_type: record.mimeType || record.imageBlob.type,
+    filename: record.fileName,
     original_filename: record.fileName,
     created_by: supabaseUser.id,
     created_at: record.createdAt
