@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dimensions of Expression</title>
-    <link rel="stylesheet" href="./src/styles.css?v=1.1.1">
+    <link rel="stylesheet" href="./src/styles.css?v=1.2.0">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
   </head>
   <body>
     <main class="app-shell">
@@ -184,11 +185,13 @@
           <span>Video link <small>optional</small></span>
           <input id="imageUploadVideo" type="url" inputmode="url" placeholder="https://">
         </label>
+        <div id="turnstileWidget" class="turnstile-widget" aria-label="Upload verification"></div>
+        <p id="imageUploadStorageNote" class="image-upload-storage-note"></p>
         <p id="imageUploadError" class="image-upload-error" role="alert"></p>
         <button class="primary-button" type="submit">Add to viewer</button>
       </form>
     </dialog>
 
-    <script src="./src/app.js?v=1.1.1" type="module"></script>
+    <script src="./src/app.js?v=1.2.2" type="module"></script>
   </body>
 </html>

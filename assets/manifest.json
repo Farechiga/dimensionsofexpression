@@ -233,6 +233,236 @@
       "title": "Christian Bale distant concern",
       "src": "./assets/Christian Bale_distant concern.jpg",
       "rightsMode": "local-study"
+    },
+    {
+      "id": "upload-095bc152-3384-4ebc-8906-b3e17a344430",
+      "title": "Jo March Hair Sadness",
+      "character": "Jo March",
+      "src": "./assets/recovered-uploads/jo-march_jo-march-hair-sadness_095bc152.png",
+      "videoUrl": "https://youtu.be/mRPCeE9dSgU?si=nitdz64d8Dsj6nQw&t=39",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:34:02.282Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-39e15a69-507f-4089-90ee-fd424ba3d036",
+      "title": "Marmee motherly pride",
+      "character": "Marmee",
+      "src": "./assets/recovered-uploads/marmee_marmee-motherly-pride_39e15a69.png",
+      "videoUrl": "https://youtu.be/mRPCeE9dSgU?si=nitdz64d8Dsj6nQw&t=39",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:36:28.029Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-be5a6afa-0c36-4127-b0ae-fcd11784ab53",
+      "title": "Jo March A Brave Sacrifice",
+      "character": "Jo March",
+      "src": "./assets/recovered-uploads/jo-march_jo-march-a-brave-sacrifice_be5a6afa.png",
+      "videoUrl": "https://youtu.be/mRPCeE9dSgU?si=nitdz64d8Dsj6nQw&t=39",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:37:32.078Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-293a9a1f-0123-4aa3-b0dc-8b2378ec9267",
+      "title": "Jo March Manuscript",
+      "character": "Jo March",
+      "src": "./assets/recovered-uploads/jo-march_jo-march-manuscript_293a9a1f.png",
+      "videoUrl": "https://youtu.be/_H1vnCIEatw?si=mv5OyScB6AEyAlNU",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:42:20.947Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-e42ab16f-431e-4aa1-ab8b-5ebb00b897ba",
+      "title": "Marmee challenging",
+      "character": "Marmee",
+      "src": "./assets/recovered-uploads/marmee_marmee-challenging_e42ab16f.png",
+      "videoUrl": "https://youtu.be/CEm7zFddI0M?si=B-TSVGCBrzhPZfnd&t=156",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:47:57.333Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-85652f5b-014a-453a-9d7d-0197674d3b7c",
+      "title": "Marmee challenging",
+      "character": "Marmee",
+      "src": "./assets/recovered-uploads/marmee_marmee-challenging_85652f5b.png",
+      "videoUrl": "https://youtu.be/CEm7zFddI0M?si=B-TSVGCBrzhPZfnd&t=156",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:48:20.734Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-815e46fe-5af7-47a9-b697-51ce74c997b8",
+      "title": "Marmee dignified",
+      "character": "Marmee",
+      "src": "./assets/recovered-uploads/marmee_marmee-dignified_815e46fe.png",
+      "videoUrl": "https://youtu.be/CEm7zFddI0M?si=B-TSVGCBrzhPZfnd&t=156",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:49:11.036Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-c6c2c6cc-6c88-41b8-a1a6-7873887f4915",
+      "title": "Jo March Recognition",
+      "character": "Jo March",
+      "src": "./assets/recovered-uploads/jo-march_jo-march-recognition_c6c2c6cc.png",
+      "videoUrl": "https://youtu.be/HqY2MeT6KHs?si=bxqYF3nBP8xgIEqV&t=31",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:51:12.536Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-c5eb5628-b93e-46d4-a28e-f5a50c848ee8",
+      "title": "Laurie spotting Jo",
+      "character": "Laurie",
+      "src": "./assets/recovered-uploads/laurie_laurie-spotting-jo_c5eb5628.png",
+      "videoUrl": "https://youtu.be/HqY2MeT6KHs?si=bxqYF3nBP8xgIEqV&t=31",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:52:19.171Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-455a758d-0ce7-47ec-ae0c-87e25c952e2c",
+      "title": "Jo Mixed feelings",
+      "character": "Jo March",
+      "src": "./assets/recovered-uploads/jo-march_jo-mixed-feelings_455a758d.png",
+      "videoUrl": "https://youtu.be/HqY2MeT6KHs?si=bxqYF3nBP8xgIEqV&t=31",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T15:54:31.989Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-838cc92f-3d05-41f7-8e86-76f4a36577df",
+      "title": "Audry Hepburn surprise",
+      "character": "Audrey Hepburn",
+      "src": "./assets/recovered-uploads/audrey-hepburn_audry-hepburn-surprise_838cc92f.png",
+      "videoUrl": "https://youtu.be/SMnXKeWHphk?si=767Et0hVy2gLNXYN&t=45",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:03:01.211Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-5a344813-4f16-4f25-9a22-29e203f11871",
+      "title": "Audrey Hepburn Wounded",
+      "character": "Audrey Hepburn",
+      "src": "./assets/recovered-uploads/audrey-hepburn_audrey-hepburn-wounded_5a344813.png",
+      "videoUrl": "https://youtu.be/SMnXKeWHphk?si=767Et0hVy2gLNXYN&t=45",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:03:24.011Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-c2ccb191-0a6b-4bf5-b623-8bc57796612f",
+      "title": "Screenshot 2026-06-25 at 11.07",
+      "character": "Audrey Hepburn",
+      "src": "./assets/recovered-uploads/audrey-hepburn_screenshot-2026-06-25-at-11-07_c2ccb191.png",
+      "videoUrl": "https://youtu.be/SMnXKeWHphk?si=767Et0hVy2gLNXYN&t=45",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:11:56.762Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-bb3860b4-d5c1-451f-b05b-6b99089a2e41",
+      "title": "Audrey Hepburn Amused",
+      "character": "Audrey Hepburn",
+      "src": "./assets/recovered-uploads/audrey-hepburn_audrey-hepburn-amused_bb3860b4.png",
+      "videoUrl": "https://youtu.be/SMnXKeWHphk?si=767Et0hVy2gLNXYN&t=45",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:13:15.308Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-8e986a75-8c7b-47ae-826f-e56641ecf4f4",
+      "title": "Audrey Hepburn The Joke",
+      "character": "Audrey Hepburn",
+      "src": "./assets/recovered-uploads/audrey-hepburn_audrey-hepburn-the-joke_8e986a75.png",
+      "videoUrl": "https://youtu.be/SMnXKeWHphk?si=767Et0hVy2gLNXYN&t=45",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:14:00.175Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-e5758910-7c19-4482-a753-60841fd5030f",
+      "title": "Santa Claus Defending Innocence",
+      "character": "Santa Claus",
+      "src": "./assets/recovered-uploads/santa-claus_santa-claus-defending-innocence_e5758910.png",
+      "videoUrl": "https://youtu.be/--uyzf7X_0c?si=nlof8FcPUwz5lcvt",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:38:29.781Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-ee95130a-fa4a-4b73-ae38-2bfb1135b84b",
+      "title": "Mrs. Walker Pleading",
+      "character": "Mrs Walker",
+      "src": "./assets/recovered-uploads/mrs-walker_mrs-walker-pleading_ee95130a.png",
+      "videoUrl": "https://youtu.be/--uyzf7X_0c?si=nlof8FcPUwz5lcvt",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:38:42.759Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-ee7903be-3639-4882-a0f5-82fbb5284add",
+      "title": "Mrs. Walker Concern",
+      "character": "Mrs Walker",
+      "src": "./assets/recovered-uploads/mrs-walker_mrs-walker-concern_ee7903be.png",
+      "videoUrl": "https://youtu.be/OvE_mDtTj20?si=RPZBDBjtqfZoEC7q",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:51:44.945Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-0022de87-6f80-4054-8b0a-0d12d34a89db",
+      "title": "Santa Claus Warm Modeling",
+      "character": "Santa Claus",
+      "src": "./assets/recovered-uploads/santa-claus_santa-claus-warm-modeling_0022de87.png",
+      "videoUrl": "https://youtu.be/OvE_mDtTj20?si=RPZBDBjtqfZoEC7q",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:52:20.407Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-feb0a0c1-031f-4fd7-95c5-f57c68008933",
+      "title": "Step Mother Challenging",
+      "character": "Step Mother",
+      "src": "./assets/recovered-uploads/step-mother_step-mother-challenging_feb0a0c1.png",
+      "videoUrl": "https://youtu.be/UHfD8OJX1eg?si=3qyoMZ5GDko0O2Of",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T16:59:25.294Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-b4c30042-3f09-4896-8b0a-4a5cb82eb3b4",
+      "title": "Cinderella injured",
+      "character": "Cinderella",
+      "src": "./assets/recovered-uploads/cinderella_cinderella-injured_b4c30042.png",
+      "videoUrl": "https://youtu.be/UHfD8OJX1eg?si=3qyoMZ5GDko0O2Of",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T17:00:01.294Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-3cf10062-b940-497c-af18-3f291337077d",
+      "title": "Cinderella dignified",
+      "character": "Cinderella",
+      "src": "./assets/recovered-uploads/cinderella_cinderella-dignified_3cf10062.png",
+      "videoUrl": "https://youtu.be/UHfD8OJX1eg?si=3qyoMZ5GDko0O2Of",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T17:00:20.558Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
+    },
+    {
+      "id": "upload-b07fc6c5-6775-4314-b0c1-6d412c0f709b",
+      "title": "Cinderella shamed",
+      "character": "Cinderella",
+      "src": "./assets/recovered-uploads/cinderella_cinderella-shamed_b07fc6c5.png",
+      "videoUrl": "https://youtu.be/UHfD8OJX1eg?si=3qyoMZ5GDko0O2Of",
+      "rightsMode": "recovered-local-study",
+      "createdAt": "2026-06-25T17:01:49.991Z",
+      "recoveredFrom": "Chrome IndexedDB http://localhost:5201"
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { taxonomy } from "./taxonomy.js?v=1.1.1";
+import { appConfig } from "./app-config.js?v=1.2.1";
 
 const taxonomyOrder = [
   "emotion-wheel",
@@ -211,6 +212,9 @@ const readingsDatabasePath = "./data/readings.json";
 const imageUploadDatabaseName = "dimensions-of-expression";
 const imageUploadStoreName = "uploaded-images";
 const imageUploadPin = "0511";
+let supabaseClient = null;
+let supabaseUser = null;
+const turnstileScriptUrl = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
 function sortedEntries(values = {}, transform = (value) => value) {
   return Object.fromEntries(
@@ -289,7 +293,10 @@ const state = {
   searchSelection: null,
   searchDestination: "",
   searchResults: [],
-  searchActiveIndex: -1
+  searchActiveIndex: -1,
+  turnstileWidgetId: null,
+  turnstileToken: "",
+  turnstileStatus: ""
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -359,6 +366,18 @@ function hasNonDefault(values = {}, defaultValue) {
   return Object.values(values).some((value) => Number(value) !== defaultValue);
 }
 
+function mergeAssetsById(...assetGroups) {
+  const seen = new Set();
+  const merged = [];
+  assetGroups.flat().forEach((asset) => {
+    const key = asset?.id || asset?.src || assetTitle(asset);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    merged.push(asset);
+  });
+  return merged;
+}
+
 async function loadAssetManifest() {
   let manifestAssets = [];
   try {
@@ -369,10 +388,176 @@ async function loadAssetManifest() {
   } catch {
     manifestAssets = [];
   }
-  const uploadedAssets = await loadUploadedAssets();
-  state.assets = [...manifestAssets, ...uploadedAssets];
+  const localAssets = await loadUploadedAssets();
+  const cloudAssets = await loadSupabaseAssets();
+  if (supabaseClient) await migrateLocalUploadsToSupabase(localAssets, cloudAssets);
+  const refreshedCloudAssets = supabaseClient ? await loadSupabaseAssets() : [];
+  const cloudIds = new Set(refreshedCloudAssets.map((asset) => asset.id));
+  const localOnlyAssets = localAssets.filter((asset) => !cloudIds.has(asset.id));
+  state.assets = mergeAssetsById(manifestAssets, refreshedCloudAssets, localOnlyAssets);
   renderCharacterFilter();
   renderAssetLibrary();
+}
+
+function hasSupabaseImageConfig() {
+  return Boolean(appConfig.supabaseUrl?.trim() && appConfig.supabasePublishableKey?.trim());
+}
+
+function hasTurnstileConfig() {
+  return Boolean(appConfig.turnstileSiteKey?.trim());
+}
+
+function isCaptchaError(error) {
+  return String(error?.message || error || "").toLowerCase().includes("captcha");
+}
+
+function loadTurnstileScript() {
+  if (window.turnstile) return Promise.resolve(window.turnstile);
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${turnstileScriptUrl}"]`);
+    const script = existing || document.createElement("script");
+    script.src = turnstileScriptUrl;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve(window.turnstile);
+    script.onerror = () => reject(new Error("Turnstile could not load."));
+    if (!existing) document.head.appendChild(script);
+
+    const startedAt = Date.now();
+    const poll = () => {
+      if (window.turnstile) {
+        resolve(window.turnstile);
+        return;
+      }
+      if (Date.now() - startedAt > 8000) {
+        reject(new Error("Turnstile is still loading. Try again in a moment."));
+        return;
+      }
+      window.setTimeout(poll, 120);
+    };
+    poll();
+  });
+}
+
+function resetTurnstileWidget() {
+  state.turnstileToken = "";
+  if (state.turnstileWidgetId !== null && window.turnstile?.reset) {
+    window.turnstile.reset(state.turnstileWidgetId);
+  }
+}
+
+async function renderTurnstileWidget() {
+  const target = $("#turnstileWidget");
+  if (!target) return;
+  target.hidden = !hasTurnstileConfig();
+  if (!hasTurnstileConfig()) return;
+  if (state.turnstileWidgetId !== null) return;
+
+  try {
+    const turnstile = await loadTurnstileScript();
+    state.turnstileWidgetId = turnstile.render(target, {
+      sitekey: appConfig.turnstileSiteKey,
+      callback: (token) => {
+        state.turnstileToken = token;
+        state.turnstileStatus = "verified";
+        renderImageUploadStorageNote();
+      },
+      "expired-callback": () => {
+        state.turnstileToken = "";
+        state.turnstileStatus = "expired";
+        renderImageUploadStorageNote();
+      },
+      "error-callback": (code) => {
+        state.turnstileToken = "";
+        state.turnstileStatus = "error";
+        const errorTarget = $("#imageUploadError");
+        if (errorTarget) {
+          errorTarget.textContent = code === "110200"
+            ? "Turnstile domain is not authorized yet. Add 127.0.0.1 and localhost in Cloudflare Hostname Management."
+            : "Turnstile could not verify this upload. Try again in a moment.";
+        }
+        renderImageUploadStorageNote();
+      }
+    });
+    state.turnstileStatus = "ready";
+  } catch (error) {
+    state.turnstileStatus = "error";
+    const errorTarget = $("#imageUploadError");
+    if (errorTarget) errorTarget.textContent = error.message;
+  }
+}
+
+async function getTurnstileToken() {
+  if (!hasTurnstileConfig()) return "";
+  if (state.turnstileToken) return state.turnstileToken;
+  await renderTurnstileWidget();
+  if (state.turnstileToken) return state.turnstileToken;
+  throw new Error("Complete the Turnstile verification before uploading.");
+}
+
+async function initializeSupabaseImages(options = {}) {
+  if (!hasSupabaseImageConfig()) return null;
+  if (supabaseClient && supabaseUser) return supabaseClient;
+  const captchaToken = options.captchaToken || "";
+  try {
+    const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
+    supabaseClient = createClient(appConfig.supabaseUrl, appConfig.supabasePublishableKey);
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    if (sessionData.session?.user) {
+      supabaseUser = sessionData.session.user;
+      return supabaseClient;
+    }
+    if (hasTurnstileConfig() && !captchaToken) return null;
+    const anonymousCredentials = captchaToken
+      ? { options: { captchaToken } }
+      : undefined;
+    const { data, error } = await supabaseClient.auth.signInAnonymously(anonymousCredentials);
+    if (error) throw error;
+    supabaseUser = data.user;
+    return supabaseClient;
+  } catch (error) {
+    if (isCaptchaError(error) && !captchaToken) return null;
+    console.warn("Supabase image preservation is unavailable; using browser storage.", error);
+    supabaseClient = null;
+    supabaseUser = null;
+    return null;
+  }
+}
+
+async function loadSupabaseAssets() {
+  const client = await initializeSupabaseImages();
+  if (!client) return [];
+  try {
+    const { data: rows, error } = await client
+      .from("images")
+      .select("id, character, title, storage_path, video_url, mime_type, original_filename, created_at")
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return (await Promise.all((rows || []).map(async (row) => {
+      const { data, error: signedUrlError } = await client.storage
+        .from(appConfig.supabaseImageBucket)
+        .createSignedUrl(row.storage_path, 60 * 60 * 24 * 7);
+      if (signedUrlError) {
+        console.warn(`Could not create a signed URL for ${row.storage_path}.`, signedUrlError);
+        return null;
+      }
+      return {
+        id: row.id,
+        title: row.title,
+        character: row.character,
+        src: data.signedUrl,
+        storagePath: row.storage_path,
+        videoUrl: row.video_url || "",
+        mimeType: row.mime_type,
+        fileName: row.original_filename,
+        rightsMode: "supabase-storage",
+        createdAt: row.created_at
+      };
+    }))).filter(Boolean);
+  } catch (error) {
+    console.warn("Supabase images could not be loaded.", error);
+    return [];
+  }
 }
 
 function openImageUploadDatabase() {
@@ -425,6 +610,59 @@ async function saveUploadedAsset(record) {
     transaction.onabort = () => reject(transaction.error);
   });
   database.close();
+}
+
+function uploadFileExtension(record) {
+  const extension = record.fileName?.split(".").pop()?.toLowerCase();
+  if (["png", "jpg", "jpeg"].includes(extension)) return extension === "jpeg" ? "jpg" : extension;
+  return record.mimeType === "image/png" ? "png" : "jpg";
+}
+
+async function preserveAssetInSupabase(record, captchaToken = "") {
+  const client = await initializeSupabaseImages({ captchaToken });
+  if (!client || !supabaseUser) return null;
+  const existing = await client.from("images").select("id").eq("id", record.id).maybeSingle();
+  if (existing.error) throw existing.error;
+  if (existing.data) return record.id;
+
+  const storagePath = `${supabaseUser.id}/${record.id}.${uploadFileExtension(record)}`;
+  const { error: uploadError } = await client.storage
+    .from(appConfig.supabaseImageBucket)
+    .upload(storagePath, record.imageBlob, {
+      contentType: record.mimeType || record.imageBlob.type,
+      upsert: false
+    });
+  if (uploadError) throw uploadError;
+
+  const { error: insertError } = await client.from("images").insert({
+    id: record.id,
+    character: record.character,
+    title: record.title,
+    storage_path: storagePath,
+    video_url: record.videoUrl || null,
+    mime_type: record.mimeType || record.imageBlob.type,
+    original_filename: record.fileName,
+    created_by: supabaseUser.id,
+    created_at: record.createdAt
+  });
+  if (insertError) {
+    await client.storage.from(appConfig.supabaseImageBucket).remove([storagePath]);
+    throw insertError;
+  }
+  return record.id;
+}
+
+async function migrateLocalUploadsToSupabase(localAssets, cloudAssets) {
+  if (!supabaseClient) return;
+  const cloudIds = new Set(cloudAssets.map((asset) => asset.id));
+  const pending = localAssets.filter((asset) => !cloudIds.has(asset.id) && asset.imageBlob);
+  for (const asset of pending) {
+    try {
+      await preserveAssetInSupabase(asset);
+    } catch (error) {
+      console.warn(`Could not preserve local upload ${asset.title} in Supabase.`, error);
+    }
+  }
 }
 
 async function loadReadingDatabase() {
@@ -618,6 +856,19 @@ function showImageAt(index) {
   setCurrentImage(image);
 }
 
+function handlePreviewImageError() {
+  const image = $("#previewImage");
+  const failedId = image.dataset.id || "";
+  const failedName = image.dataset.name || "";
+  const currentSrc = image.getAttribute("src") || "";
+  const fallback = state.assets.find((asset) => {
+    if (!asset.src || asset.src === currentSrc || asset.src.startsWith("http")) return false;
+    return asset.id === failedId || assetTitle(asset) === failedName;
+  });
+  if (!fallback) return;
+  image.src = fallback.src;
+}
+
 function changeImage(delta) {
   if (!confirmImageChange()) return;
   if (!state.assets.length) ensureGeneratedImages();
@@ -641,16 +892,34 @@ function renderCharacterSuggestions() {
     .join("");
 }
 
+function renderImageUploadStorageNote() {
+  const note = $("#imageUploadStorageNote");
+  if (!note) return;
+  const cloudReady = hasSupabaseImageConfig();
+  const turnstileReady = !hasTurnstileConfig() || Boolean(state.turnstileToken);
+  note.classList.toggle("is-cloud-ready", cloudReady && turnstileReady);
+  if (!cloudReady) {
+    note.textContent = "Supabase is not configured yet. Images added here are only cached in this browser until cloud storage is connected.";
+  } else if (!turnstileReady) {
+    note.textContent = "Complete the Turnstile check to preserve this upload in Supabase Storage.";
+  } else {
+    note.textContent = "Images will be preserved in Supabase Storage and remembered across browsers.";
+  }
+}
+
 function openImageUploadDialog() {
   const dialog = $("#imageUploadDialog");
   $("#imageUploadForm").reset();
   $("#imageUploadError").textContent = "";
+  resetTurnstileWidget();
+  renderImageUploadStorageNote();
   renderCharacterSuggestions();
   if (typeof dialog.showModal === "function") {
     dialog.showModal();
   } else {
     dialog.setAttribute("open", "");
   }
+  renderTurnstileWidget();
   $("#imageUploadPin").focus();
 }
 
@@ -715,12 +984,35 @@ async function addUploadedImage(event) {
     createdAt: new Date().toISOString()
   };
 
+  let captchaToken = "";
   try {
-    await saveUploadedAsset(storedRecord);
+    if (hasSupabaseImageConfig() && hasTurnstileConfig()) {
+      captchaToken = await getTurnstileToken();
+    }
   } catch (error) {
-    errorTarget.textContent = "This image could not be saved in the browser.";
-    console.error(error);
+    errorTarget.textContent = error.message;
     return;
+  }
+
+  try {
+    const cloudId = await preserveAssetInSupabase(storedRecord, captchaToken);
+    if (!cloudId) {
+      await saveUploadedAsset(storedRecord);
+      window.alert("Image saved only in this browser. Configure Supabase Storage to preserve uploads across sessions and devices.");
+    } else {
+      resetTurnstileWidget();
+    }
+  } catch (error) {
+    console.warn("Cloud preservation failed; saving this image in the browser.", error);
+    resetTurnstileWidget();
+    try {
+      await saveUploadedAsset(storedRecord);
+      window.alert("Cloud preservation failed, so this image was saved only in this browser.");
+    } catch (localError) {
+      errorTarget.textContent = "This image could not be preserved.";
+      console.error(localError);
+      return;
+    }
   }
 
   const asset = {
@@ -1803,6 +2095,7 @@ $("#nextBtn").addEventListener("click", () => setStep(state.step + 1));
 $("#readingForm").addEventListener("submit", saveReading);
 $("#prevImageBtn").addEventListener("click", () => changeImage(-1));
 $("#nextImageBtn").addEventListener("click", () => changeImage(1));
+$("#previewImage").addEventListener("error", handlePreviewImageError);
 $("#addImageBtn").addEventListener("click", openImageUploadDialog);
 $("#playVideoBtn").addEventListener("click", openCurrentImageVideo);
 $("#closeImageUploadBtn").addEventListener("click", closeImageUploadDialog);

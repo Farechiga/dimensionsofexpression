@@ -1751,6 +1751,30 @@ h1 {
   font-weight: 720;
 }
 
+.image-upload-storage-note {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 10px;
+  background: #f7f5ee;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 720;
+  line-height: 1.28;
+}
+
+.image-upload-storage-note.is-cloud-ready {
+  border-color: rgba(36, 106, 115, 0.32);
+  background: rgba(36, 106, 115, 0.08);
+  color: var(--teal);
+}
+
+.turnstile-widget {
+  min-height: 65px;
+  display: grid;
+  align-items: center;
+}
+
 .image-controls {
   margin-top: 0;
 }

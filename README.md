@@ -50,14 +50,18 @@ The expressive vocabulary lives in `src/taxonomy.js` so categories and terms can
 
 Images inside `assets/private/` are ignored by Git. This keeps study frames local unless you deliberately move public-safe assets elsewhere. The static browser app cannot write files back into `assets/`; repository images should be added through the folder and manifest.
 
-## Browser Uploads
+## Preserved Uploads
 
-The plus button in the image viewer stores approved PNG/JPG uploads and their metadata in IndexedDB. These images persist in that browser and join the carousel and character filter without changing `assets/manifest.json`.
+The plus button uploads approved PNG/JPG files to a private Supabase Storage bucket and stores character, title, video URL, storage path, owner, and timestamps in `public.images`. Private files are displayed with expiring signed URLs.
 
-For shared, cross-device use, replace the IndexedDB adapter with:
+Run [`supabase/images.sql`](supabase/images.sql) in the Supabase SQL editor, enable anonymous sign-ins, then add the project URL and publishable key to `src/app-config.js`.
 
-- a private Supabase Storage bucket for image files;
-- an `images` table containing `id`, `character`, `title`, `storage_path`, `video_url`, `created_by`, and `created_at`;
-- row-level policies that allow authenticated or anonymous users to read approved records while restricting uploads.
+```js
+export const appConfig = {
+  supabaseUrl: "https://YOUR_PROJECT.supabase.co",
+  supabasePublishableKey: "YOUR_PUBLISHABLE_KEY",
+  supabaseImageBucket: "expression-images"
+};
+```
 
-The four-digit browser PIN is a lightweight workflow gate. Real access protection should be enforced by Supabase authentication, storage policies, and server-side validation.
+When Supabase is unavailable or unconfigured, uploads fall back to IndexedDB. Existing IndexedDB uploads are migrated automatically when Supabase becomes available. The four-digit browser PIN remains a lightweight workflow gate; durable access control is enforced by anonymous authentication and row-level policies.
