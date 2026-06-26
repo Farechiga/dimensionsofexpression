@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=1.1.1";
+import { taxonomy } from "./taxonomy.js?v=1.1.2";
 import { appConfig } from "./app-config.js?v=1.2.1";
 
 const taxonomyOrder = [
@@ -63,7 +63,7 @@ const emotionFamilies = [
   {
     name: "Sadness",
     defaults: ["Sad", "Depressed"],
-    terms: ["Sad", "Suffering", "Agony", "Hurt", "Depressed", "Sorrow", "Disappointed", "Dismayed", "Displeased", "Shameful", "Regretful", "Guilty", "Neglected", "Isolated", "Lonely", "Despair", "Grief", "Powerless", "Wistful", "Yearning", "Forlorn"]
+    terms: ["Sad", "Suffering", "Agony", "Hurt", "Depressed", "Sorrow", "Disappointed", "Dismayed", "Displeased", "Shameful", "Regretful", "Guilty", "Neglected", "Isolated", "Lonely", "Despair", "Grief", "Powerless", "Wistful", "Yearning", "Forlorn", "Wronged"]
   },
   {
     name: "Surprise",
@@ -211,6 +211,7 @@ const radarColors = ["#246a73", "#bd5d4e", "#7a6fa5", "#c99a2e", "#577a4a", "#9a
 const readingsDatabasePath = "./data/readings.json";
 const imageUploadDatabaseName = "dimensions-of-expression";
 const imageUploadStoreName = "uploaded-images";
+const customTermsStorageKey = "expressionCustomTerms";
 const imageUploadPin = "0511";
 let supabaseClient = null;
 let supabaseUser = null;
@@ -309,6 +310,83 @@ const categoryLabels = {
   "state-bearing": "State"
 };
 
+function normalizedTerm(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function addUniqueTerm(terms, term) {
+  const cleanTerm = normalizedTerm(term);
+  if (!cleanTerm) return false;
+  if (terms.some((existing) => existing.toLowerCase() === cleanTerm.toLowerCase())) return false;
+  terms.push(cleanTerm);
+  return true;
+}
+
+function loadCustomTermDefinitions() {
+  try {
+    const stored = window.localStorage?.getItem(customTermsStorageKey);
+    const parsed = stored ? JSON.parse(stored) : [];
+    return Array.isArray(parsed) ? parsed.filter((definition) => definition?.term && definition?.kind) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomTermDefinitions(definitions) {
+  window.localStorage?.setItem(customTermsStorageKey, JSON.stringify(definitions));
+}
+
+function customTermKey(definition) {
+  return [
+    definition.kind,
+    definition.categoryId || "",
+    definition.groupLabel || "",
+    definition.familyName || "",
+    definition.dimensionName || "",
+    definition.featureName || "",
+    normalizedTerm(definition.term).toLowerCase()
+  ].join("|");
+}
+
+function persistCustomTermDefinition(definition) {
+  const key = customTermKey(definition);
+  if (customTermDefinitions.some((existing) => customTermKey(existing) === key)) return;
+  customTermDefinitions.push(definition);
+  saveCustomTermDefinitions(customTermDefinitions);
+}
+
+function addCustomTermDefinition(definition, options = {}) {
+  const term = normalizedTerm(definition.term);
+  if (!term) return { added: false, message: "Enter a word or phrase." };
+  const normalizedDefinition = { ...definition, term };
+  let added = false;
+
+  if (definition.kind === "vocabulary") {
+    const category = taxonomy.find((item) => item.id === definition.categoryId);
+    const group = category?.groups.find((item) => item.label === definition.groupLabel);
+    if (!group) return { added: false, message: "Choose a vocabulary section." };
+    added = addUniqueTerm(group.terms, term);
+  } else if (definition.kind === "emotion") {
+    const family = emotionFamilies.find((item) => item.name === definition.familyName);
+    if (!family) return { added: false, message: "Choose an emotion slider family." };
+    added = addUniqueTerm(family.terms, term);
+  } else if (definition.kind === "event") {
+    const dimension = whatJustHappenedDimensions.find((item) => item.name === definition.dimensionName);
+    if (!dimension) return { added: false, message: "Choose an interpretive slider type." };
+    added = addUniqueTerm(dimension.terms, term);
+  } else if (definition.kind === "feature") {
+    const feature = signalAttributes.find((item) => item.name === definition.featureName);
+    if (!feature) return { added: false, message: "Choose a feature area." };
+    added = addUniqueTerm(feature.terms, term);
+  }
+
+  if (added && options.persist !== false) persistCustomTermDefinition(normalizedDefinition);
+  return { added, message: added ? `Added ${term}.` : `${term} is already available.` };
+}
+
+let customTermDefinitions = loadCustomTermDefinitions();
+customTermDefinitions.forEach((definition) => addCustomTermDefinition(definition, { persist: false }));
+
 function buildSearchIndex() {
   const items = [];
   taxonomy.forEach((category) => {
@@ -360,7 +438,7 @@ function buildSearchIndex() {
   return items;
 }
 
-const taxonomySearchIndex = buildSearchIndex();
+let taxonomySearchIndex = buildSearchIndex();
 
 function hasNonDefault(values = {}, defaultValue) {
   return Object.values(values).some((value) => Number(value) !== defaultValue);
@@ -1970,6 +2048,135 @@ function applyTaxonomySearchSelection() {
   clearTaxonomySearch(`Added ${item.term} at ${intensity}`);
 }
 
+function appendCustomTermToCurrentControls(definition) {
+  if (definition.kind === "vocabulary") {
+    buildTaxonomy();
+  } else if (definition.kind === "emotion") {
+    $$(".blend-chip").forEach((chip) => {
+      if (chip.dataset.emotionFamily !== definition.familyName) return;
+      const select = chip.querySelector(".emotion-term-select");
+      if (!select || Array.from(select.options).some((option) => option.value.toLowerCase() === definition.term.toLowerCase())) return;
+      select.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(definition.term)}">${escapeHtml(definition.term)}</option>`);
+    });
+  } else if (definition.kind === "event") {
+    const index = whatJustHappenedDimensions.findIndex((dimension) => dimension.name === definition.dimensionName);
+    const select = $$(".event-chip")[index]?.querySelector(".event-term-select");
+    if (select && !Array.from(select.options).some((option) => option.value.toLowerCase() === definition.term.toLowerCase())) {
+      select.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(definition.term)}">${escapeHtml(definition.term)}</option>`);
+    }
+  } else if (definition.kind === "feature") {
+    const featureIndex = signalAttributes.findIndex((feature) => feature.name === definition.featureName);
+    const descriptorList = $$(".feature-row")[featureIndex]?.querySelector(".descriptor-list");
+    const value = `${definition.featureName}: ${definition.term}`;
+    if (descriptorList && !$$("input[name='signalDescriptor']").some((input) => input.value.toLowerCase() === value.toLowerCase())) {
+      descriptorList.insertAdjacentHTML("beforeend", `
+        <label class="descriptor-chip">
+          <input type="checkbox" name="signalDescriptor" value="${escapeHtml(value)}">
+          <span>${escapeHtml(definition.term)}</span>
+        </label>
+      `);
+      const checkbox = Array.from(descriptorList.querySelectorAll("input[name='signalDescriptor']"))
+        .find((input) => input.value === value);
+      checkbox?.addEventListener("change", renderModuleChecklist);
+    }
+  }
+}
+
+function customTermPrimaryOptions(type) {
+  if (type === "vocabulary") {
+    return orderedTaxonomy.map((category) => ({ value: category.id, label: categoryLabels[category.id] || category.title }));
+  }
+  if (type === "emotion") return emotionFamilies.map((family) => ({ value: family.name, label: family.name }));
+  if (type === "event") return whatJustHappenedDimensions.map((dimension) => ({ value: dimension.name, label: dimension.name }));
+  if (type === "feature") return signalAttributes.map((feature) => ({ value: feature.name, label: feature.name }));
+  return [];
+}
+
+function renderCustomTermSecondaryOptions() {
+  const type = $("#customTermType").value;
+  const primary = $("#customTermPrimary").value;
+  const secondaryWrap = $("#customTermSecondaryWrap");
+  const secondary = $("#customTermSecondary");
+  secondaryWrap.hidden = type !== "vocabulary";
+  if (type !== "vocabulary") {
+    secondary.innerHTML = "";
+    return;
+  }
+  const category = orderedTaxonomy.find((item) => item.id === primary) || orderedTaxonomy[0];
+  secondary.innerHTML = (category?.groups || []).map((group) => (
+    `<option value="${escapeHtml(group.label)}">${escapeHtml(group.label)}</option>`
+  )).join("");
+}
+
+function renderCustomTermControls() {
+  const type = $("#customTermType").value;
+  const primary = $("#customTermPrimary");
+  const primaryLabel = $("#customTermPrimaryLabel");
+  const labels = {
+    vocabulary: "Vocabulary section",
+    emotion: "Emotion slider",
+    event: "Interpretive slider",
+    feature: "Feature area"
+  };
+  primaryLabel.textContent = labels[type] || "Section";
+  primary.innerHTML = customTermPrimaryOptions(type).map((option) => (
+    `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`
+  )).join("");
+  renderCustomTermSecondaryOptions();
+}
+
+function openCustomTermDialog() {
+  const dialog = $("#customTermDialog");
+  $("#customTermForm").reset();
+  $("#customTermNote").textContent = "";
+  renderCustomTermControls();
+  if (typeof dialog.showModal === "function") dialog.showModal();
+  else dialog.setAttribute("open", "");
+  $("#customTermValue").focus();
+}
+
+function closeCustomTermDialog() {
+  const dialog = $("#customTermDialog");
+  if (typeof dialog.close === "function") dialog.close();
+  else dialog.removeAttribute("open");
+}
+
+function customTermDefinitionFromForm() {
+  const kind = $("#customTermType").value;
+  const term = normalizedTerm($("#customTermValue").value);
+  const primary = $("#customTermPrimary").value;
+  const secondary = $("#customTermSecondary").value;
+  if (kind === "vocabulary") return { kind, term, categoryId: primary, groupLabel: secondary };
+  if (kind === "emotion") return { kind, term, familyName: primary };
+  if (kind === "event") return { kind, term, dimensionName: primary };
+  if (kind === "feature") return { kind, term, featureName: primary };
+  return { kind, term };
+}
+
+function saveCustomTerm(event) {
+  event.preventDefault();
+  const definition = customTermDefinitionFromForm();
+  const result = addCustomTermDefinition(definition);
+  taxonomySearchIndex = buildSearchIndex();
+  if (result.added) appendCustomTermToCurrentControls(definition);
+  $("#customTermNote").textContent = result.message;
+  if (result.added) {
+    $("#taxonomySearch").value = definition.term;
+    renderTaxonomySearchResults(definition.term);
+  }
+}
+
+function bindCustomTermDialog() {
+  $("#openCustomTermBtn").addEventListener("click", openCustomTermDialog);
+  $("#closeCustomTermBtn").addEventListener("click", closeCustomTermDialog);
+  $("#customTermType").addEventListener("change", renderCustomTermControls);
+  $("#customTermPrimary").addEventListener("change", renderCustomTermSecondaryOptions);
+  $("#customTermForm").addEventListener("submit", saveCustomTerm);
+  $("#customTermDialog").addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) closeCustomTermDialog();
+  });
+}
+
 function hasPendingSearchDescription() {
   return Boolean(state.searchSelection && state.searchSelection.type !== "vocabulary" && $("#taxonomySearchIntensity"));
 }
@@ -2155,6 +2362,7 @@ buildTaxonomy();
 bindSliders();
 bindBins();
 bindTaxonomySearch();
+bindCustomTermDialog();
 initializeImages();
 
 $$(".step").forEach((button) => button.addEventListener("click", () => setStep(Number(button.dataset.step))));
