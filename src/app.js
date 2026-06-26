@@ -627,11 +627,57 @@ function normalizedImageMimeType(file, fileExtension = "") {
   return "";
 }
 
+function sharedSaveError(stage, error) {
+  const message = error?.message || String(error || "Unknown error");
+  const wrapped = new Error(`${stage}: ${message}`);
+  wrapped.cause = error;
+  wrapped.stage = stage;
+  return wrapped;
+}
+
+function friendlySharedSaveError(error) {
+  const message = error?.message || String(error || "Unknown error");
+  const lowerMessage = message.toLowerCase();
+  if (lowerMessage.includes("row-level security") || lowerMessage.includes("violates row-level")) {
+    return "Supabase policy blocked the save. Rerun supabase/images.sql, then try again.";
+  }
+  if (lowerMessage.includes("bucket") && lowerMessage.includes("not found")) {
+    return "The expression-images storage bucket is missing. Rerun supabase/images.sql.";
+  }
+  if (lowerMessage.includes("exceeded") || lowerMessage.includes("too large") || lowerMessage.includes("payload")) {
+    return "The image file is too large for the current upload limit.";
+  }
+  if (lowerMessage.includes("captcha") || lowerMessage.includes("turnstile")) {
+    return "Verification did not reach Supabase. Refresh and complete verification again.";
+  }
+  if (lowerMessage.includes("created_by") || lowerMessage.includes("column")) {
+    return "The images table schema is out of date. Rerun supabase/images.sql.";
+  }
+  return message;
+}
+
+function rememberSharedSaveError(error) {
+  const diagnostic = {
+    message: error?.message || String(error || "Unknown error"),
+    stage: error?.stage || "",
+    cause: error?.cause?.message || "",
+    at: new Date().toISOString()
+  };
+  try {
+    localStorage.setItem("dimensions:lastSharedSaveError", JSON.stringify(diagnostic));
+  } catch {
+    // Local diagnostic storage is helpful, not required.
+  }
+  return diagnostic;
+}
+
 async function preserveAssetInSupabase(record, captchaToken = "") {
   const client = await initializeSupabaseImages({ captchaToken });
-  if (!client || !supabaseUser) return null;
+  if (!client || !supabaseUser) {
+    throw sharedSaveError("Anonymous sign-in", new Error("Supabase anonymous sign-in did not complete."));
+  }
   const existing = await client.from("images").select("id").eq("id", record.id).maybeSingle();
-  if (existing.error) throw existing.error;
+  if (existing.error) throw sharedSaveError("Image lookup", existing.error);
   if (existing.data) return record.id;
 
   const storagePath = `${supabaseUser.id}/${record.id}.${uploadFileExtension(record)}`;
@@ -641,7 +687,7 @@ async function preserveAssetInSupabase(record, captchaToken = "") {
       contentType: record.mimeType || record.imageBlob.type,
       upsert: false
     });
-  if (uploadError) throw uploadError;
+  if (uploadError) throw sharedSaveError("Storage upload", uploadError);
 
   const { error: insertError } = await client.from("images").insert({
     id: record.id,
@@ -655,8 +701,9 @@ async function preserveAssetInSupabase(record, captchaToken = "") {
     created_at: record.createdAt
   });
   if (insertError) {
-    await client.storage.from(appConfig.supabaseImageBucket).remove([storagePath]);
-    throw insertError;
+    const { error: removeError } = await client.storage.from(appConfig.supabaseImageBucket).remove([storagePath]);
+    if (removeError) console.warn("Could not remove storage object after image table insert failed.", removeError);
+    throw sharedSaveError("Image table insert", insertError);
   }
   return record.id;
 }
@@ -1014,11 +1061,13 @@ async function addUploadedImage(event) {
       resetTurnstileWidget();
     }
   } catch (error) {
-    console.warn("Cloud preservation failed; saving this image in the browser.", error);
+    const diagnostic = rememberSharedSaveError(error);
+    console.warn("Cloud preservation failed; saving this image in the browser.", diagnostic, error);
     resetTurnstileWidget();
     try {
       await saveUploadedAsset(storedRecord);
-      window.alert("Image added on this device only. It will not appear for other visitors yet.");
+      window.alert(`Image added on this device only. Shared save failed: ${friendlySharedSaveError(error)}`);
+      errorTarget.textContent = `Shared save failed: ${friendlySharedSaveError(error)}`;
     } catch (localError) {
       errorTarget.textContent = "This image could not be preserved.";
       console.error(localError);
