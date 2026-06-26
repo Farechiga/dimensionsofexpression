@@ -1,4 +1,4 @@
-import { taxonomy } from "./taxonomy.js?v=1.1.2";
+import { taxonomy } from "./taxonomy.js?v=1.1.3";
 import { appConfig } from "./app-config.js?v=1.2.1";
 
 const taxonomyOrder = [
@@ -212,6 +212,9 @@ const readingsDatabasePath = "./data/readings.json";
 const imageUploadDatabaseName = "dimensions-of-expression";
 const imageUploadStoreName = "uploaded-images";
 const customTermsStorageKey = "expressionCustomTerms";
+const termCorrections = {
+  forebearance: "forbearance"
+};
 const imageUploadPin = "0511";
 let supabaseClient = null;
 let supabaseUser = null;
@@ -223,6 +226,22 @@ function sortedEntries(values = {}, transform = (value) => value) {
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([key, value]) => [key, transform(value)])
   );
+}
+
+function correctKnownTermTypos(value) {
+  return String(value || "").replace(/\bforebearance\b/gi, termCorrections.forebearance);
+}
+
+function correctKnownTermTyposInList(terms = []) {
+  const seen = new Set();
+  return terms.reduce((items, term) => {
+    const corrected = correctKnownTermTypos(term);
+    const key = corrected.toLowerCase();
+    if (seen.has(key)) return items;
+    seen.add(key);
+    items.push(corrected);
+    return items;
+  }, []);
 }
 
 function readingFingerprint(reading = {}) {
@@ -262,8 +281,16 @@ function loadSavedReadings() {
     const saved = window.localStorage?.getItem("expressionReadings");
     const parsed = saved ? JSON.parse(saved) : [];
     if (!Array.isArray(parsed)) return [];
-    const uniqueReadings = deduplicateReadings(parsed);
-    if (uniqueReadings.length !== parsed.length) {
+    const correctedReadings = parsed.map((reading) => ({
+      ...reading,
+      externalTerms: correctKnownTermTyposInList(reading.externalTerms),
+      internalTerms: correctKnownTermTyposInList(reading.internalTerms),
+      ...(Array.isArray(reading.taxonomyTerms)
+        ? { taxonomyTerms: correctKnownTermTyposInList(reading.taxonomyTerms) }
+        : {})
+    }));
+    const uniqueReadings = deduplicateReadings(correctedReadings);
+    if (JSON.stringify(uniqueReadings) !== JSON.stringify(parsed)) {
       window.localStorage?.setItem("expressionReadings", JSON.stringify(uniqueReadings));
     }
     return uniqueReadings;
@@ -326,7 +353,18 @@ function loadCustomTermDefinitions() {
   try {
     const stored = window.localStorage?.getItem(customTermsStorageKey);
     const parsed = stored ? JSON.parse(stored) : [];
-    return Array.isArray(parsed) ? parsed.filter((definition) => definition?.term && definition?.kind) : [];
+    if (!Array.isArray(parsed)) return [];
+    const corrected = parsed
+      .filter((definition) => definition?.term && definition?.kind)
+      .map((definition) => ({
+        ...definition,
+        term: correctKnownTermTypos(definition.term)
+      }));
+    const unique = corrected.filter((definition, index) => (
+      corrected.findIndex((candidate) => customTermKey(candidate) === customTermKey(definition)) === index
+    ));
+    if (JSON.stringify(unique) !== JSON.stringify(parsed)) saveCustomTermDefinitions(unique);
+    return unique;
   } catch {
     return [];
   }
